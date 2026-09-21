@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
+import { getArrivals } from "@/lib/arrivals.functions";
 import type { Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(true);
+  const fetchArrivals = useServerFn(getArrivals);
+  const { data } = useQuery({
+    queryKey: ["arribos", stop.code],
+    queryFn: () => fetchArrivals({ data: { stopId: stop.code } }),
+    refetchInterval: 60_000,
+  });
+  const arribos = data?.arribos ?? stop.arribos;
+  const envivo = data?.fuente === "google";
+
 
   useEffect(() => {
     document.body.style.overflow = paywallOpen ? "hidden" : "auto";
