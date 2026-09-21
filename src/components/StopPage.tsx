@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
+import { getArrivals } from "@/lib/arrivals.functions";
 import type { Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(true);
+  const fetchArrivals = useServerFn(getArrivals);
+  const { data } = useQuery({
+    queryKey: ["arribos", stop.code],
+    queryFn: () => fetchArrivals({ data: { stopId: stop.code } }),
+    refetchInterval: 60_000,
+  });
+  const arribos = data?.arribos ?? stop.arribos;
+  const envivo = data?.fuente === "google";
+
 
   useEffect(() => {
     document.body.style.overflow = paywallOpen ? "hidden" : "auto";
@@ -24,7 +36,7 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
           <div className="live">
             <span className="dot" />
-            Datos en vivo
+            {envivo ? "Datos en vivo" : "Horarios de ejemplo"}
           </div>
         </header>
 
@@ -41,11 +53,11 @@ export function StopPage({ stop }: { stop: Stop }) {
 
           <div className="section-title">
             <h2>Próximos arribos</h2>
-            <span>{stop.arribos.length} recorridos</span>
+            <span>{arribos.length} recorridos</span>
           </div>
 
           <div id="busList">
-            {stop.arribos.map((b) => (
+            {arribos.map((b) => (
               <article className="bus-card" key={`${b.linea}-${b.destino}`}>
                 <div className="route">{b.linea}</div>
                 <div>
