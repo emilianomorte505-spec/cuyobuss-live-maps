@@ -36,7 +36,7 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
           <div className="live">
             <span className="dot" />
-            Datos en vivo
+            {envivo ? "Datos en vivo" : "Horarios de ejemplo"}
           </div>
         </header>
 
@@ -53,11 +53,11 @@ export function StopPage({ stop }: { stop: Stop }) {
 
           <div className="section-title">
             <h2>Próximos arribos</h2>
-            <span>{stop.arribos.length} recorridos</span>
+            <span>{arribos.length} recorridos</span>
           </div>
 
           <div id="busList">
-            {stop.arribos.map((b) => (
+            {arribos.map((b) => (
               <article className="bus-card" key={`${b.linea}-${b.destino}`}>
                 <div className="route">{b.linea}</div>
                 <div>
