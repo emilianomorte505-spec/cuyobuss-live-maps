@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
 import { getArrivals } from "@/lib/arrivals.functions";
-import type { Stop } from "@/lib/stops";
+import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(true);

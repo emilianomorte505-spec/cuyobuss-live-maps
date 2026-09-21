@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { findStop, type Arrival } from "./stops";
+import { findStop, arribosBase, type Arrival, type Stop } from "./stops";
 
 /**
  * Destinos de referencia dentro del Gran San Juan.
@@ -16,6 +16,8 @@ const DESTINOS = [
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
 const CACHE_MS = 3 * 60 * 1000;
+/** Solo el poste exacto: en una misma calle hay varias paradas distintas. */
+const RADIO_POSTE_M = 45;
 const cache = new Map<string, { at: number; arribos: Arrival[] }>();
 
 type TransitStep = {
@@ -38,6 +40,26 @@ function metros(aLat: number, aLng: number, bLat: number, bLng: number) {
   return Math.sqrt(dLat * dLat + x * x) * R;
 }
 
+/** "203", "Línea 203", "L203" → "203" para poder comparar con las líneas de la parada. */
+function normalizarLinea(valor: string) {
+  const soloNumero = valor.match(/\d{1,4}[A-Za-z]?/);
+  return (soloNumero ? soloNumero[0] : valor).toUpperCase().trim();
+}
+
+/** Mezcla las tarjetas fijas de la parada con los minutos reales encontrados. */
+function combinar(stop: Stop, vivos: Map<string, number[]>): Arrival[] {
+  return stop.lineas.map((l) => {
+    const minutos = vivos.get(normalizarLinea(l.linea))?.sort((a, b) => a - b) ?? [];
+    const proximo = minutos[0];
+    return {
+      linea: l.linea,
+      destino: l.destino,
+      minutos: proximo ?? -1,
+      estado: proximo === undefined ? ("Sin datos" as const) : ("A tiempo" as const),
+    };
+  });
+}
+
 export const getArrivals = createServerFn({ method: "POST" })
   .inputValidator((input: { stopId: string }) => {
     if (!input || typeof input.stopId !== "string" || input.stopId.length > 60) {
@@ -57,11 +79,12 @@ export const getArrivals = createServerFn({ method: "POST" })
     const lovableKey = process.env["LOVABLE_API_KEY"];
     const mapsKey = process.env["GOOGLE_MAPS_API_KEY"];
     if (!lovableKey || !mapsKey) {
-      return { arribos: stop.arribos, fuente: "ejemplo" };
+      return { arribos: arribosBase(stop), fuente: "ejemplo" };
     }
 
     const ahora = Date.now();
-    const encontrados = new Map<string, Arrival>();
+    const permitidas = new Set(stop.lineas.map((l) => normalizarLinea(l.linea)));
+    const vivos = new Map<string, number[]>();
 
     const consultas = DESTINOS.map(async (destino) => {
       if (metros(stop.lat, stop.lng, destino.lat, destino.lng) < 700) return;
@@ -100,19 +123,19 @@ export const getArrivals = createServerFn({ method: "POST" })
             const salida = td?.stopDetails?.departureStop?.location?.latLng;
             const hora = td?.stopDetails?.departureTime;
             if (!td || !salida || !hora) continue;
-            // Solo arribos que salen de esta parada (o de una a menos de 300 m).
-            if (metros(stop.lat, stop.lng, salida.latitude, salida.longitude) > 300) continue;
+            // Solo el poste exacto de esta parada.
+            if (metros(stop.lat, stop.lng, salida.latitude, salida.longitude) > RADIO_POSTE_M) continue;
 
             const minutos = Math.round((new Date(hora).getTime() - ahora) / 60000);
             if (minutos < 0 || minutos > 90) continue;
 
-            const linea = td.transitLine?.nameShort ?? td.transitLine?.name ?? "—";
-            const dest = td.headsign ?? destino.nombre;
-            const clave = `${linea}|${dest}`;
-            const previo = encontrados.get(clave);
-            if (!previo || previo.minutos > minutos) {
-              encontrados.set(clave, { linea, destino: dest, minutos, estado: "A tiempo" });
-            }
+            const linea = normalizarLinea(td.transitLine?.nameShort ?? td.transitLine?.name ?? "—");
+            // Las líneas de la parada están fijas: lo que no sea de ellas no entra.
+            if (!permitidas.has(linea)) continue;
+
+            const previos = vivos.get(linea) ?? [];
+            if (!previos.includes(minutos)) previos.push(minutos);
+            vivos.set(linea, previos);
           }
         }
       }
@@ -120,9 +143,9 @@ export const getArrivals = createServerFn({ method: "POST" })
 
     await Promise.allSettled(consultas);
 
-    const arribos = [...encontrados.values()].sort((a, b) => a.minutos - b.minutos).slice(0, 6);
-    if (arribos.length === 0) {
-      return { arribos: hit?.arribos ?? stop.arribos, fuente: hit ? "google" : "ejemplo" };
+    const arribos = combinar(stop, vivos);
+    if (vivos.size === 0) {
+      return { arribos: hit?.arribos ?? arribos, fuente: hit ? "google" : "ejemplo" };
     }
 
     cache.set(stop.code, { at: ahora, arribos });
