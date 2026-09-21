@@ -21,9 +21,7 @@ export const Route = createFileRoute("/p/$stopId")({
     };
   },
   loader: ({ params }) => {
-    const stop = findStop(params.stopId);
-    if (!stop) throw notFound();
-    return { stop };
+    if (!findStop(params.stopId)) throw notFound();
   },
   notFoundComponent: () => (
     <div className="shell">
@@ -41,6 +39,7 @@ export const Route = createFileRoute("/p/$stopId")({
 });
 
 function StopRoute() {
-  const { stop } = Route.useLoaderData();
+  const { stopId } = Route.useParams();
+  const stop = findStop(stopId)!;
   return <StopPage stop={stop} />;
 }
