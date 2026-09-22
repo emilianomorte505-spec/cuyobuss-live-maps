@@ -25,5 +25,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <StopPage stop={DEFAULT_STOP} />;
+  return (
+    <AuthGate>
+      <StopPage stop={DEFAULT_STOP} />
+    </AuthGate>
+  );
 }

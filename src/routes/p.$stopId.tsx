@@ -42,5 +42,9 @@ export const Route = createFileRoute("/p/$stopId")({
 function StopRoute() {
   const { stopId } = Route.useParams();
   const stop = findStop(stopId)!;
-  return <StopPage stop={stop} />;
+  return (
+    <AuthGate>
+      <StopPage stop={stop} />
+    </AuthGate>
+  );
 }
