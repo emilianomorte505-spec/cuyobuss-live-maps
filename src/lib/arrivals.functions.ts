@@ -1,5 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { findStop, arribosBase, type Arrival, type Stop } from "./stops";
+import { horariosDe, proximosMinutos } from "./timetables";
+
+/** Arribos calculados con la planilla oficial de la línea. */
+function desdeHorarios(stop: Stop): { arribos: Arrival[]; completo: boolean } {
+  let completo = true;
+  const arribos = stop.lineas.map<Arrival>((l) => {
+    const horarios = horariosDe(stop.code, l.linea);
+    const proximo = horarios ? proximosMinutos(horarios, new Date(), 1)[0] : undefined;
+    if (proximo === undefined) completo = false;
+    return {
+      linea: l.linea,
+      destino: l.destino,
+      minutos: proximo ?? -1,
+      estado: proximo === undefined ? ("Sin datos" as const) : ("A tiempo" as const),
+    };
+  });
+  return { arribos, completo };
+}
 
 /**
  * Destinos de referencia dentro del Gran San Juan.
