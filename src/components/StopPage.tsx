@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
+import { supabase } from "@/integrations/supabase/client";
 import { getArrivals } from "@/lib/arrivals.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
