@@ -3,6 +3,8 @@ export type Arrival = {
   destino: string;
   /** -1 = todavía sin horario confirmado para esa línea */
   minutos: number;
+  /** Minutos hasta el colectivo siguiente al próximo; -1 = desconocido */
+  minutosProximo: number;
   estado: "A tiempo" | "Demorado" | "Sin datos";
 };
 
@@ -70,6 +72,7 @@ export function arribosBase(stop: Stop): Arrival[] {
     linea: l.linea,
     destino: l.destino,
     minutos: -1,
+    minutosProximo: -1,
     estado: "Sin datos" as const,
   }));
 }

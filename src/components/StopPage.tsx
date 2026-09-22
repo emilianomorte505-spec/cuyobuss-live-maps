@@ -86,6 +86,11 @@ export function StopPage({ stop }: { stop: Stop }) {
                   >
                     {b.estado === "Sin datos" ? "Buscando horario" : b.estado}
                   </div>
+                  {b.minutosProximo >= 0 && (
+                    <div className="status" style={{ color: "#8a8577" }}>
+                      después: {b.minutosProximo} min
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
