@@ -85,9 +85,18 @@ export const getArrivals = createServerFn({ method: "POST" })
     }
     return { stopId: input.stopId.toLowerCase() };
   })
-  .handler(async ({ data }): Promise<{ arribos: Arrival[]; fuente: "google" | "ejemplo" }> => {
-    const stop = findStop(data.stopId);
-    if (!stop) throw new Error("Parada desconocida");
+  .handler(
+    async ({
+      data,
+    }): Promise<{ arribos: Arrival[]; fuente: "horario" | "google" | "ejemplo" }> => {
+      const stop = findStop(data.stopId);
+      if (!stop) throw new Error("Parada desconocida");
+
+      // La planilla oficial de la línea manda: no gasta consultas y nunca cambia de parada.
+      const planilla = desdeHorarios(stop);
+      if (planilla.completo) {
+        return { arribos: planilla.arribos, fuente: "horario" };
+      }
 
     const hit = cache.get(stop.code);
     if (hit && Date.now() - hit.at < CACHE_MS) {
