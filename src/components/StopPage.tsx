@@ -13,7 +13,7 @@ export function StopPage({ stop }: { stop: Stop }) {
     queryFn: () => fetchArrivals({ data: { stopId: stop.code } }),
     refetchInterval: 60_000,
   });
-  const arribos = data?.arribos ?? stop.arribos;
+  const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
   const envivo = data?.fuente === "google";
 
 
@@ -48,7 +48,7 @@ export function StopPage({ stop }: { stop: Stop }) {
               <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
-            {stop.zona} · Actualizado ahora
+            {stop.zona} · {stop.sentido} · Actualizado ahora
           </div>
 
           <div className="section-title">
@@ -65,12 +65,19 @@ export function StopPage({ stop }: { stop: Stop }) {
                   <div className="dest">{b.destino}</div>
                 </div>
                 <div>
-                  <div className="mins">{b.minutos} min</div>
+                  <div className="mins">{b.minutos < 0 ? "—" : `${b.minutos} min`}</div>
                   <div
                     className="status"
-                    style={{ color: b.estado === "A tiempo" ? "#397a50" : "#c45b42" }}
+                    style={{
+                      color:
+                        b.estado === "A tiempo"
+                          ? "#397a50"
+                          : b.estado === "Demorado"
+                            ? "#c45b42"
+                            : "#8a8577",
+                    }}
                   >
-                    {b.estado}
+                    {b.estado === "Sin datos" ? "Buscando horario" : b.estado}
                   </div>
                 </div>
               </article>
