@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AuthGate } from "@/components/AuthGate";
 import { StopPage } from "@/components/StopPage";
 import { DEFAULT_STOP } from "@/lib/stops";
 
@@ -24,5 +25,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <StopPage stop={DEFAULT_STOP} />;
+  return (
+    <AuthGate>
+      <StopPage stop={DEFAULT_STOP} />
+    </AuthGate>
+  );
 }

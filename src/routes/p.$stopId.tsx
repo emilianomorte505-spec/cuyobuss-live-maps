@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { AuthGate } from "@/components/AuthGate";
 import { StopPage } from "@/components/StopPage";
 import { findStop } from "@/lib/stops";
 
@@ -41,5 +42,9 @@ export const Route = createFileRoute("/p/$stopId")({
 function StopRoute() {
   const { stopId } = Route.useParams();
   const stop = findStop(stopId)!;
-  return <StopPage stop={stop} />;
+  return (
+    <AuthGate>
+      <StopPage stop={stop} />
+    </AuthGate>
+  );
 }

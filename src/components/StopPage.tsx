@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
+import { supabase } from "@/integrations/supabase/client";
 import { getArrivals } from "@/lib/arrivals.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
@@ -14,7 +15,13 @@ export function StopPage({ stop }: { stop: Stop }) {
     refetchInterval: 60_000,
   });
   const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
-  const envivo = data?.fuente === "google";
+  const fuente = data?.fuente;
+  const etiqueta =
+    fuente === "horario"
+      ? "Horarios oficiales"
+      : fuente === "google"
+        ? "Datos en vivo"
+        : "Buscando horarios";
 
 
   useEffect(() => {
@@ -36,7 +43,7 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
           <div className="live">
             <span className="dot" />
-            {envivo ? "Datos en vivo" : "Horarios de ejemplo"}
+            {etiqueta}
           </div>
         </header>
 
@@ -85,7 +92,12 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
         </main>
 
-        <footer>© 2026 Cuyobuss · Hecho en San Juan · Información orientativa</footer>
+        <footer>
+          © 2026 Cuyobuss · Hecho en San Juan · Información orientativa ·{" "}
+          <button className="logout" type="button" onClick={() => supabase.auth.signOut()}>
+            Salir
+          </button>
+        </footer>
       </div>
 
       <div
