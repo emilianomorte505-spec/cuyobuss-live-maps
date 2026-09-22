@@ -14,7 +14,13 @@ export function StopPage({ stop }: { stop: Stop }) {
     refetchInterval: 60_000,
   });
   const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
-  const envivo = data?.fuente === "google";
+  const fuente = data?.fuente;
+  const etiqueta =
+    fuente === "horario"
+      ? "Horarios oficiales"
+      : fuente === "google"
+        ? "Datos en vivo"
+        : "Buscando horarios";
 
 
   useEffect(() => {
