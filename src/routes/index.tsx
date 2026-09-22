@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AuthGate } from "@/components/AuthGate";
 import { StopPage } from "@/components/StopPage";
 import { DEFAULT_STOP } from "@/lib/stops";
 

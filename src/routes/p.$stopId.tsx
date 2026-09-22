@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { AuthGate } from "@/components/AuthGate";
 import { StopPage } from "@/components/StopPage";
 import { findStop } from "@/lib/stops";
 
