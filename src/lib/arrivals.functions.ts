@@ -7,12 +7,14 @@ function desdeHorarios(stop: Stop): { arribos: Arrival[]; completo: boolean } {
   let completo = true;
   const arribos = stop.lineas.map<Arrival>((l) => {
     const horarios = horariosDe(stop.code, l.linea);
-    const proximo = horarios ? proximosMinutos(horarios, new Date(), 1)[0] : undefined;
+    const proximos = horarios ? proximosMinutos(horarios, new Date(), 2) : [];
+    const proximo = proximos[0];
     if (proximo === undefined) completo = false;
     return {
       linea: l.linea,
       destino: l.destino,
       minutos: proximo ?? -1,
+      minutosProximo: proximos[1] ?? -1,
       estado: proximo === undefined ? ("Sin datos" as const) : ("A tiempo" as const),
     };
   });
@@ -73,6 +75,7 @@ function combinar(stop: Stop, vivos: Map<string, number[]>): Arrival[] {
       linea: l.linea,
       destino: l.destino,
       minutos: proximo ?? -1,
+      minutosProximo: minutos[1] ?? -1,
       estado: proximo === undefined ? ("Sin datos" as const) : ("A tiempo" as const),
     };
   });
