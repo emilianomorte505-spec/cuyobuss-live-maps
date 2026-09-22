@@ -42,7 +42,7 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
           <div className="live">
             <span className="dot" />
-            {envivo ? "Datos en vivo" : "Horarios de ejemplo"}
+            {etiqueta}
           </div>
         </header>
 
