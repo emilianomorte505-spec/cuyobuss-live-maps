@@ -91,7 +91,12 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
         </main>
 
-        <footer>© 2026 Cuyobuss · Hecho en San Juan · Información orientativa</footer>
+        <footer>
+          © 2026 Cuyobuss · Hecho en San Juan · Información orientativa ·{" "}
+          <button className="logout" type="button" onClick={() => supabase.auth.signOut()}>
+            Salir
+          </button>
+        </footer>
       </div>
 
       <div
