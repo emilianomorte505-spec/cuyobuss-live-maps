@@ -25,6 +25,8 @@ export type Stop = {
   sentido: string;
   /** Líneas que realmente frenan en este poste. */
   lineas: Linea[];
+  /** Nombre de la parada en las planillas oficiales (tabla horarios_parada). */
+  planilla?: string;
 };
 
 export const STOPS: Stop[] = [
