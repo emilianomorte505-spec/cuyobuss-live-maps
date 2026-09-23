@@ -25,6 +25,8 @@ export type Stop = {
   sentido: string;
   /** Líneas que realmente frenan en este poste. */
   lineas: Linea[];
+  /** Nombre de la parada en las planillas oficiales (tabla horarios_parada). */
+  planilla?: string;
 };
 
 export const STOPS: Stop[] = [
@@ -36,6 +38,7 @@ export const STOPS: Stop[] = [
     lng: -68.5162306,
     sentido: "Hacia el Centro",
     lineas: [{ linea: "203", destino: "Centro · Plaza 25 de Mayo" }],
+    planilla: "agustin-gomez-y-gral-acha-s",
   },
   {
     code: "cordoba-acha",
@@ -44,10 +47,8 @@ export const STOPS: Stop[] = [
     lat: -31.5375,
     lng: -68.5364,
     sentido: "Hacia el Centro",
-    lineas: [
-      { linea: "210", destino: "Centro · Plaza 25 de Mayo" },
-      { linea: "205", destino: "Centro · Plaza 25 de Mayo" },
-    ],
+    lineas: [],
+    planilla: "av-cordoba-y-gral-acha-a",
   },
   {
     code: "rawson",

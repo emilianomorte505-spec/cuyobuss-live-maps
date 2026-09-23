@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      horarios_parada: {
+        Row: {
+          created_at: string
+          dom: string[]
+          id: string
+          linea: string
+          lv: string[]
+          parada_nombre: string
+          parada_slug: string
+          sab: string[]
+        }
+        Insert: {
+          created_at?: string
+          dom?: string[]
+          id?: string
+          linea: string
+          lv?: string[]
+          parada_nombre: string
+          parada_slug: string
+          sab?: string[]
+        }
+        Update: {
+          created_at?: string
+          dom?: string[]
+          id?: string
+          linea?: string
+          lv?: string[]
+          parada_nombre?: string
+          parada_slug?: string
+          sab?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
