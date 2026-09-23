@@ -1,6 +1,59 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { findStop, arribosBase, type Arrival, type Stop } from "./stops";
-import { horariosDe, proximosMinutos } from "./timetables";
+import { horariosDe, proximosMinutos, type Horarios } from "./timetables";
+import type { Database } from "@/integrations/supabase/types";
+
+/** Planillas oficiales cargadas en la base (tabla horarios_parada). */
+async function desdeBase(stop: Stop): Promise<Arrival[] | null> {
+  if (!stop.planilla) return null;
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) return null;
+
+  const db = createClient<Database>(url, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => {
+        const h = new Headers(init?.headers);
+        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
+          h.delete("Authorization");
+        }
+        h.set("apikey", key);
+        return fetch(input, { ...init, headers: h });
+      },
+    },
+  });
+
+  const { data, error } = await db
+    .from("horarios_parada")
+    .select("linea, lv, sab, dom")
+    .eq("parada_slug", stop.planilla);
+
+  if (error) {
+    console.error("horarios_parada", error.message);
+    return null;
+  }
+  if (!data || data.length === 0) return null;
+
+  const etiquetas = new Map(stop.lineas.map((l) => [l.linea, l.destino]));
+  const ahora = new Date();
+
+  return data
+    .map((fila) => {
+      const horarios: Horarios = { lv: fila.lv ?? [], sab: fila.sab ?? [], dom: fila.dom ?? [] };
+      const proximos = proximosMinutos(horarios, ahora, 2);
+      const proximo = proximos[0];
+      return {
+        linea: fila.linea,
+        destino: etiquetas.get(fila.linea) ?? "Recorrido oficial",
+        minutos: proximo ?? -1,
+        minutosProximo: proximos[1] ?? -1,
+        estado: proximo === undefined ? ("Sin datos" as const) : ("A tiempo" as const),
+      };
+    })
+    .sort((a, b) => (a.minutos < 0 ? 1 : b.minutos < 0 ? -1 : a.minutos - b.minutos));
+}
 
 /** Arribos calculados con la planilla oficial de la línea. */
 function desdeHorarios(stop: Stop): { arribos: Arrival[]; completo: boolean } {
