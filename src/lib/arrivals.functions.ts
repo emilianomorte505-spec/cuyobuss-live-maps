@@ -148,6 +148,12 @@ export const getArrivals = createServerFn({ method: "POST" })
       const stop = findStop(data.stopId);
       if (!stop) throw new Error("Parada desconocida");
 
+      // Primero las planillas oficiales cargadas en la base.
+      const deBase = await desdeBase(stop);
+      if (deBase && deBase.length > 0) {
+        return { arribos: deBase, fuente: "horario" };
+      }
+
       // La planilla oficial de la línea manda: no gasta consultas y nunca cambia de parada.
       const planilla = desdeHorarios(stop);
       if (planilla.completo) {
