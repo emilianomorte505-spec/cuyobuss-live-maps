@@ -5,8 +5,13 @@ export type Arrival = {
   minutos: number;
   /** Minutos hasta el colectivo siguiente al próximo; -1 = desconocido */
   minutosProximo: number;
-  estado: "A tiempo" | "Demorado" | "Sin datos";
+  estado: "A tiempo" | "Demorado" | "Adelantado" | "Sin datos";
+  /** Minutos de atraso (+) o adelanto (−) avisados por alguien a bordo. */
+  desvio?: number;
+  /** true cuando el ajuste viene de un pasajero que ya se subió. */
+  reportado?: boolean;
 };
+
 
 /** Línea fija asignada a la parada: nunca cambia ni desaparece de la pantalla. */
 export type Linea = {

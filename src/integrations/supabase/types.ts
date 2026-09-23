@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reportes_viaje: {
+        Row: {
+          created_at: string
+          desvio_minutos: number
+          hora_programada: string | null
+          id: string
+          linea: string
+          parada_slug: string | null
+          stop_code: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          desvio_minutos?: number
+          hora_programada?: string | null
+          id?: string
+          linea: string
+          parada_slug?: string | null
+          stop_code: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          desvio_minutos?: number
+          hora_programada?: string | null
+          id?: string
+          linea?: string
+          parada_slug?: string | null
+          stop_code?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

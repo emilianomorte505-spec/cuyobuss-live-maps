@@ -71,3 +71,27 @@ export function proximosMinutos(horarios: Horarios, now = new Date(), cuantos = 
 
   return proximos.slice(0, cuantos);
 }
+
+/**
+ * Cuando alguien avisa que se subió al colectivo, comparamos la hora real con
+ * la pasada más cercana de la planilla: así sabemos si va demorado o adelantado.
+ * Devuelve null si no hay ninguna pasada cercana (±40 min).
+ */
+export function desvioRespectoPlanilla(
+  horarios: Horarios,
+  now = new Date(),
+): { desvio: number; programada: string } | null {
+  const { dia, minutos } = ahoraEnArgentina(now);
+  const deHoy = dia === 0 ? horarios.dom : dia === 6 ? horarios.sab : horarios.lv;
+
+  let mejor: { desvio: number; programada: string } | null = null;
+  for (const hhmm of deHoy) {
+    const desvio = minutos - aMinutos(hhmm);
+    if (Math.abs(desvio) > 40) continue;
+    if (!mejor || Math.abs(desvio) < Math.abs(mejor.desvio)) {
+      mejor = { desvio, programada: hhmm };
+    }
+  }
+  return mejor;
+}
+
