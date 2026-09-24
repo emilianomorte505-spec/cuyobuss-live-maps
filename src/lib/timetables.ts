@@ -75,7 +75,7 @@ export function proximosMinutos(horarios: Horarios, now = new Date(), cuantos = 
 /**
  * Cuando alguien avisa que se subió al colectivo, comparamos la hora real con
  * la pasada más cercana de la planilla: así sabemos si va demorado o adelantado.
- * Devuelve null si no hay ninguna pasada cercana (±40 min).
+ * Devuelve null si no hay ninguna pasada cercana (±20 min).
  */
 export function desvioRespectoPlanilla(
   horarios: Horarios,
@@ -87,7 +87,7 @@ export function desvioRespectoPlanilla(
   let mejor: { desvio: number; programada: string } | null = null;
   for (const hhmm of deHoy) {
     const desvio = minutos - aMinutos(hhmm);
-    if (Math.abs(desvio) > 40) continue;
+    if (Math.abs(desvio) > 20) continue;
     if (!mejor || Math.abs(desvio) < Math.abs(mejor.desvio)) {
       mejor = { desvio, programada: hhmm };
     }
