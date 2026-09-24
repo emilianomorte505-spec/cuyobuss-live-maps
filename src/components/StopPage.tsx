@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
 import { supabase } from "@/integrations/supabase/client";
-import { getArrivals } from "@/lib/arrivals.functions";
+import { getArrivals, reportarViaje } from "@/lib/arrivals.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(true);
+  const [aviso, setAviso] = useState<string | null>(null);
   const fetchArrivals = useServerFn(getArrivals);
-  const { data } = useQuery({
+  const enviarReporte = useServerFn(reportarViaje);
+  const { data, refetch } = useQuery({
     queryKey: ["arribos", stop.code],
     queryFn: () => fetchArrivals({ data: { stopId: stop.code } }),
     refetchInterval: 60_000,
+  });
+  const reporte = useMutation({
+    mutationFn: (linea: string) => enviarReporte({ data: { stopId: stop.code, linea } }),
+    onSuccess: (res) => {
+      setAviso(res.mensaje);
+      void refetch();
+    },
+    onError: () => setAviso("No pudimos registrar tu aviso. Probá de nuevo."),
   });
   const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
   const fuente = data?.fuente;
@@ -30,6 +40,7 @@ export function StopPage({ stop }: { stop: Stop }) {
       document.body.style.overflow = "auto";
     };
   }, [paywallOpen]);
+
 
   return (
     <>
@@ -63,6 +74,16 @@ export function StopPage({ stop }: { stop: Stop }) {
             <span>{arribos.length} recorridos</span>
           </div>
 
+          {aviso && (
+            <div
+              className="detail"
+              style={{ marginBottom: 12, color: "#397a50", fontWeight: 700 }}
+              role="status"
+            >
+              {aviso}
+            </div>
+          )}
+
           <div id="busList">
             {arribos.map((b) => (
               <article className="bus-card" key={`${b.linea}-${b.destino}`}>
@@ -70,6 +91,27 @@ export function StopPage({ stop }: { stop: Stop }) {
                 <div>
                   <div className="bus-line">Línea {b.linea} · Hacia</div>
                   <div className="dest">{b.destino}</div>
+                  <button
+                    type="button"
+                    disabled={reporte.isPending}
+                    onClick={() => {
+                      setAviso(null);
+                      reporte.mutate(b.linea);
+                    }}
+                    style={{
+                      marginTop: 8,
+                      border: "1px solid var(--line)",
+                      background: "transparent",
+                      borderRadius: 999,
+                      padding: "6px 12px",
+                      font: "700 11px Manrope, sans-serif",
+                      letterSpacing: "0.4px",
+                      cursor: "pointer",
+                      opacity: reporte.isPending ? 0.5 : 1,
+                    }}
+                  >
+                    Me subí al {b.linea}
+                  </button>
                 </div>
                 <div>
                   <div className="mins">{b.minutos < 0 ? "—" : `${b.minutos} min`}</div>
@@ -81,11 +123,18 @@ export function StopPage({ stop }: { stop: Stop }) {
                           ? "#397a50"
                           : b.estado === "Demorado"
                             ? "#c45b42"
-                            : "#8a8577",
+                            : b.estado === "Adelantado"
+                              ? "#397a50"
+                              : "#8a8577",
                     }}
                   >
                     {b.estado === "Sin datos" ? "Buscando horario" : b.estado}
                   </div>
+                  {b.reportado && b.desvio !== undefined && b.desvio !== 0 && (
+                    <div className="status" style={{ color: "#c45b42" }}>
+                      {b.desvio > 0 ? `+${b.desvio}` : b.desvio} min · avisado a bordo
+                    </div>
+                  )}
                   {b.minutosProximo >= 0 && (
                     <div className="status" style={{ color: "#8a8577" }}>
                       después: {b.minutosProximo} min
@@ -95,6 +144,7 @@ export function StopPage({ stop }: { stop: Stop }) {
               </article>
             ))}
           </div>
+
         </main>
 
         <footer>
