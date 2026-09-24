@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CuyobussLogo } from "./CuyobussLogo";
 import { supabase } from "@/integrations/supabase/client";
-import { getArrivals } from "@/lib/arrivals.functions";
+import { getArrivals, reportarViaje } from "@/lib/arrivals.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(true);
+  const [aviso, setAviso] = useState<string | null>(null);
   const fetchArrivals = useServerFn(getArrivals);
-  const { data } = useQuery({
+  const enviarReporte = useServerFn(reportarViaje);
+  const { data, refetch } = useQuery({
     queryKey: ["arribos", stop.code],
     queryFn: () => fetchArrivals({ data: { stopId: stop.code } }),
     refetchInterval: 60_000,
+  });
+  const reporte = useMutation({
+    mutationFn: (linea: string) => enviarReporte({ data: { stopId: stop.code, linea } }),
+    onSuccess: (res) => {
+      setAviso(res.mensaje);
+      void refetch();
+    },
+    onError: () => setAviso("No pudimos registrar tu aviso. Probá de nuevo."),
   });
   const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
   const fuente = data?.fuente;
@@ -30,6 +40,7 @@ export function StopPage({ stop }: { stop: Stop }) {
       document.body.style.overflow = "auto";
     };
   }, [paywallOpen]);
+
 
   return (
     <>
