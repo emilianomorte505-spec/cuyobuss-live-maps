@@ -1,50 +1,35 @@
-# cuyobuss
+🚌 Cuyobuss
 
-¡Sí, es totalmente posible! Se llama Google Maps Transit API y es exactamente lo que necesitás.
+> Sistema inteligente de información y estimación de arribos en tiempo real para el transporte público de San Juan, Argentina (**RedTulum**), integrado con tags físicos **NFC** en paradas y reporte colaborativo de pasajeros a bordo.
 
-Así funcionaría:
+---
 
-Cada tag NFC tiene codificada la ubicación GPS de esa parada. Cuando alguien lo toca, la web le manda esas coordenadas a Google y Google devuelve automáticamente qué líneas pasan por ahí y en cuánto tiempo llega cada una. Sin cargar nada a mano, sin mantener horarios, todo automático.
+## 📌 Visión del Proyecto
 
-La gran ventaja es que Google ya tiene cargadas todas las paradas de San Juan, todas las líneas y los horarios. Vos no tenés que hacer nada de eso.
+**Cuyobuss** resuelve la incertidumbre del transporte público en la calle mediante interacción física instantánea y crowdsourcing:
+1. **Sin descargar aplicaciones:** El pasajero apoya su teléfono en el sticker NFC instalado en el poste de la parada (o escanea el QR de respaldo) y accede al instante a la webapp optimizada para móviles.
+2. **Poste exacto:** Cada parada cuenta con su propia URL identificadora (`/p/:stopId`), mostrando únicamente las líneas y sentidos que se detienen en esa vereda física.
+3. **Doble arribo programado:** Muestra en cuántos minutos llega el próximo colectivo y cuánto falta para el siguiente ("después: X min").
+4. **"Waze de bondis" (Reporte en vivo):** Cuando un pasajero aborda la unidad y toca *"¡Me subí al colectivo!"*, el sistema calcula el desvío exacto frente a la planilla oficial y propaga el retraso o adelanto a todas las paradas siguientes del recorrido.
 
-Hay un solo detalle importante — ¿sabés si la web está hecha en React, en HTML simple, o en otro framework? Eso define cómo se conecta la API técnicamente.
+---
 
-Pero quiero, pero quiero mi sistema, o sea, que tenga mi, interfa, mi interfaz, la cual es la que te diseñé y te mandé en imágenes, con el cuyo bus y con el de logo y todo el sistema web mío propio, pero automáticamente cargado con Google Calendar. O sea, necesito que ellos solamente me pasen la información de los horarios automáticamente por día en un sistema de un servidor. Dime cómo hacer eso. Eh, Exactamente, y sea automatizado para que no tenga que estar eh, cargando bondi por bondi, parada por parada.
+## 🛠️ Stack Tecnológico
 
-Perfecto, entendí exactamente lo que querés. Tu interfaz, tu marca, pero los datos de Google alimentando todo automáticamente. Así funciona:
+* **Frontend:** [TanStack Start v1](https://tanstack.com/start) sobre **React 19** y **Vite 7**, aprovechando renderizado rápido en el Edge y Server Functions tipadas de punta a punta.
+* **Enrutamiento & Estado:** [TanStack Router](https://tanstack.com/router) con rutas dinámicas seguras y [TanStack Query](https://tanstack.com/query) para refresco en tiempo real de arribos.
+* **Estilos & Diseño:** Tailwind CSS v4 con arquitectura de diseño móvil nativa y modo oscuro de alto contraste (`cuyobuss.css`).
+* **Backend & Base de Datos:** PostgreSQL en la nube con **Row Level Security (RLS)** y funciones RPC en servidor (`createServerFn`).
+* **Autenticación:** Autenticación por correo y contraseña con sesión persistente (el usuario solo inicia sesión una vez en su dispositivo).
+* **APIs Externas:** Google Maps Transit API (con filtrado geográfico estricto a 45 metros de poste) y motor de planillas oficiales RedTulum.
+* **Monetización:** Arquitectura de paywall integrada para suscripción mensual ($1.500 ARS/mes) lista para pasarela de pagos (Mercado Pago).
 
-Exactamente así funciona. Tu interfaz de cuyobuss queda intacta — el logo, los colores, todo. Google solo actúa como proveedor de datos en el fondo, el usuario nunca lo ve.
+---
 
-Lo técnico concreto que necesitás:
+## ⚙️ Arquitectura del Sistema
 
-1. Google Maps Transit API — tiene las 122 líneas de San Juan ya cargadas. Con las coordenadas GPS de cada parada te devuelve los horarios automáticamente.
-
-2. Un servidor simple — Node.js o Python que consulta Google cada noche a medianoche y guarda los horarios actualizados. Cuesta aproximadamente $5-10 USD/mes en hosting.
-
-3. Cada tag NFC lleva un ID único de parada en la URL. Cuando alguien lo toca, la web sabe exactamente qué parada es y muestra sus horarios.
-
-¿La web está hecha en algún framework específico? ¿Sabés quién la desarrolló? Eso define cuánto trabajo implica conectar el backend.
-
-no, no tiene hecha ningún framework ni eh, la desarrollé yo con multiplataformas de IA con OpenAI Open Cloud y diferentes quiero dejar de tener un montón de plataformas o sea, no un montón, sino que lo que pasa es que al tener diferentes guías y al querer pasarme del sistema al mejor sistema al mejor sistema, termino creando muchas diferentes bocetos o interfaces, entonces necesito estructurar bien el plan para poder empezar a crear por lo menos una parada si tengo una interfaz lo suficientemente buena para copiar en todas las paradas no puedo estar más perdiendo tiempo en interfaz, en interfaz, en interfaz la interfaz ya la tengo te la mandé, eso quiero no quiero cambiar nada Quiero tener un buen plan de ejecución y con el modelo que te he explicado hace rato, con el que coordinamos, de Google Maps. Time Transit API. Eso. Necesito una buena, sólida eh, columna vertebral para empezar con mi amigo a desarrollar todo el sistema. HAZLO CON LA INTERFAZ QUE TE MANDO EN HTML Y SI NECESITAS ACESO A ALGO PIDEMELO
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/17863ebb-de9e-4043-bde4-95501106d2e6).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+### 1. Interacción NFC y Enrutamiento Unificado
+Cada chip físico (NTAG213 / NTAG215) se programa con una URL limpia y corta:
+```text
+https://tudominio.com/p/agustin-gomez-acha
+https://tudominio.com/p/cordoba-acha
