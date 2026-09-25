@@ -30,6 +30,37 @@ function clientePublico(): SupabaseClient<Database> | null {
   });
 }
 
+/** Parada en código, o cualquiera de las 6.500+ de la base usando su slug. */
+async function resolverStop(code: string): Promise<Stop | null> {
+  const fija = findStop(code);
+  if (fija) return fija;
+  const db = clientePublico();
+  if (!db) return null;
+  const { data } = await db
+    .from("horarios_parada")
+    .select("parada_nombre")
+    .eq("parada_slug", code)
+    .limit(1);
+  const fila = data?.[0];
+  if (!fila) return null;
+  return {
+    code,
+    nombre: fila.parada_nombre,
+    zona: "San Juan",
+    lat: 0,
+    lng: 0,
+    sentido: "Planilla oficial",
+    lineas: [],
+    planilla: code,
+  };
+}
+
+export const getStop = createServerFn({ method: "GET" })
+  .inputValidator((input: { stopId: string }) => ({
+    stopId: String(input?.stopId ?? "").toLowerCase().slice(0, 80),
+  }))
+  .handler(async ({ data }) => resolverStop(data.stopId));
+
 /** Planillas oficiales cargadas en la base (tabla horarios_parada). */
 async function horariosDeLaBase(stop: Stop): Promise<Map<string, Horarios> | null> {
   if (!stop.planilla) return null;
@@ -175,7 +206,7 @@ function combinar(stop: Stop, vivos: Map<string, number[]>): Arrival[] {
 
 export const getArrivals = createServerFn({ method: "POST" })
   .inputValidator((input: { stopId: string }) => {
-    if (!input || typeof input.stopId !== "string" || input.stopId.length > 60) {
+    if (!input || typeof input.stopId !== "string" || input.stopId.length > 80) {
       throw new Error("Parada inválida");
     }
     return { stopId: input.stopId.toLowerCase() };
@@ -184,7 +215,7 @@ export const getArrivals = createServerFn({ method: "POST" })
     async ({
       data,
     }): Promise<{ arribos: Arrival[]; fuente: "horario" | "google" | "ejemplo" }> => {
-      const stop = findStop(data.stopId);
+      const stop = await resolverStop(data.stopId);
       if (!stop) throw new Error("Parada desconocida");
 
       const [tablaBase, desvios] = await Promise.all([horariosDeLaBase(stop), desviosVigentes()]);
@@ -307,14 +338,14 @@ export const reportarViaje = createServerFn({ method: "POST" })
     if (!input || typeof input.stopId !== "string" || typeof input.linea !== "string") {
       throw new Error("Datos inválidos");
     }
-    return { stopId: input.stopId.toLowerCase().slice(0, 60), linea: input.linea.slice(0, 10) };
+    return { stopId: input.stopId.toLowerCase().slice(0, 80), linea: input.linea.slice(0, 10) };
   })
   .handler(
     async ({
       data,
       context,
     }): Promise<{ ok: boolean; desvio: number; mensaje: string }> => {
-      const stop = findStop(data.stopId);
+      const stop = await resolverStop(data.stopId);
       if (!stop) throw new Error("Parada desconocida");
 
       const { supabase, userId } = context;
