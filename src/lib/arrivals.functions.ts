@@ -36,6 +36,19 @@ async function resolverStop(code: string): Promise<Stop | null> {
   if (fija) return fija;
   const db = clientePublico();
   if (!db) return null;
+  const { data: creada } = await db.from("paradas").select("*").eq("code", code).maybeSingle();
+  if (creada) {
+    return {
+      code: creada.code,
+      nombre: creada.nombre,
+      zona: creada.zona,
+      lat: creada.lat,
+      lng: creada.lng,
+      sentido: creada.sentido,
+      lineas: Array.isArray(creada.lineas) ? (creada.lineas as { linea: string; destino: string }[]) : [],
+      planilla: creada.planilla ?? undefined,
+    };
+  }
   const { data } = await db
     .from("horarios_parada")
     .select("parada_nombre")
@@ -223,7 +236,8 @@ export const getArrivals = createServerFn({ method: "POST" })
       // Primero las planillas oficiales cargadas en la base.
       if (tablaBase && tablaBase.size > 0) {
         const etiquetas = new Map(stop.lineas.map((l) => [l.linea, l.destino]));
-        const lineas = [...tablaBase.keys()].map((linea) => ({
+        const elegidas = stop.lineas.length > 0 ? stop.lineas.map((l) => l.linea).filter((l) => tablaBase.has(l)) : [];
+        const lineas = (elegidas.length > 0 ? elegidas : [...tablaBase.keys()]).map((linea) => ({
           linea,
           destino: etiquetas.get(linea) ?? "Recorrido oficial",
         }));

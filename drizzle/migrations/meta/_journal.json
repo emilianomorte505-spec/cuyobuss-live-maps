@@ -15,6 +15,13 @@
       "when": 1790175462751,
       "tag": "0001_create_reportes_viaje",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790304037195,
+      "tag": "0002_perfiles_roles_paradas",
+      "breakpoints": true
     }
   ]
 }
