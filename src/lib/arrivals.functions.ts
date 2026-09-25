@@ -36,6 +36,19 @@ async function resolverStop(code: string): Promise<Stop | null> {
   if (fija) return fija;
   const db = clientePublico();
   if (!db) return null;
+  const { data: creada } = await db.from("paradas").select("*").eq("code", code).maybeSingle();
+  if (creada) {
+    return {
+      code: creada.code,
+      nombre: creada.nombre,
+      zona: creada.zona,
+      lat: creada.lat,
+      lng: creada.lng,
+      sentido: creada.sentido,
+      lineas: Array.isArray(creada.lineas) ? (creada.lineas as { linea: string; destino: string }[]) : [],
+      planilla: creada.planilla ?? undefined,
+    };
+  }
   const { data } = await db
     .from("horarios_parada")
     .select("parada_nombre")
