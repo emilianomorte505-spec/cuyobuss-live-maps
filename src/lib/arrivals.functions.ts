@@ -243,6 +243,8 @@ export const getArrivals = createServerFn({ method: "POST" })
         };
       }
 
+      if (stop.lineas.length === 0) return { arribos: [], fuente: "ejemplo" };
+
       const hit = cache.get(stop.code);
       if (hit && Date.now() - hit.at < CACHE_MS) {
         return { arribos: aplicarDesvios(hit.arribos, desvios), fuente: "google" };
