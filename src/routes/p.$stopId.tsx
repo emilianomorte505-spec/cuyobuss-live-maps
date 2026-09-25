@@ -1,11 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AuthGate } from "@/components/AuthGate";
 import { StopPage } from "@/components/StopPage";
-import { findStop } from "@/lib/stops";
+import { getStop } from "@/lib/arrivals.functions";
 
 export const Route = createFileRoute("/p/$stopId")({
-  head: ({ params }) => {
-    const stop = findStop(params.stopId);
+  loader: async ({ params }) => {
+    const stop = await getStop({ data: { stopId: params.stopId } });
+    if (!stop) throw notFound();
+    return { stop };
+  },
+  head: ({ loaderData }) => {
+    const stop = loaderData?.stop;
     const title = stop ? `${stop.nombre} — Cuyobuss` : "Parada — Cuyobuss";
     const description = stop
       ? `Próximos colectivos en ${stop.nombre}, ${stop.zona}.`
@@ -21,9 +26,6 @@ export const Route = createFileRoute("/p/$stopId")({
       ],
     };
   },
-  loader: ({ params }) => {
-    if (!findStop(params.stopId)) throw notFound();
-  },
   notFoundComponent: () => (
     <div className="shell">
       <main>
@@ -36,12 +38,19 @@ export const Route = createFileRoute("/p/$stopId")({
       </main>
     </div>
   ),
+  errorComponent: () => (
+    <div className="shell">
+      <main>
+        <h1 className="stop-name">No pudimos cargar la parada</h1>
+        <div className="detail">Probá de nuevo en unos segundos.</div>
+      </main>
+    </div>
+  ),
   component: StopRoute,
 });
 
 function StopRoute() {
-  const { stopId } = Route.useParams();
-  const stop = findStop(stopId)!;
+  const { stop } = Route.useLoaderData();
   return (
     <AuthGate>
       <StopPage stop={stop} />
