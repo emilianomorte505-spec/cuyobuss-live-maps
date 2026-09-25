@@ -236,7 +236,8 @@ export const getArrivals = createServerFn({ method: "POST" })
       // Primero las planillas oficiales cargadas en la base.
       if (tablaBase && tablaBase.size > 0) {
         const etiquetas = new Map(stop.lineas.map((l) => [l.linea, l.destino]));
-        const lineas = [...tablaBase.keys()].map((linea) => ({
+        const elegidas = stop.lineas.length > 0 ? stop.lineas.map((l) => l.linea).filter((l) => tablaBase.has(l)) : [];
+        const lineas = (elegidas.length > 0 ? elegidas : [...tablaBase.keys()]).map((linea) => ({
           linea,
           destino: etiquetas.get(linea) ?? "Recorrido oficial",
         }));
