@@ -72,7 +72,7 @@ function cargarMapa(): Promise<void> {
   if (window.google?.maps) return Promise.resolve();
   return new Promise((resolve) => {
     window.__cuyoMapa = () => resolve();
-    const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
+    const key = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'];
     const s = document.createElement("script");
     s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=__cuyoMapa`;
     s.async = true;

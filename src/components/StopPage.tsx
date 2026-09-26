@@ -7,7 +7,21 @@ import { getArrivals, reportarViaje } from "@/lib/arrivals.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 
 export function StopPage({ stop }: { stop: Stop }) {
-  const [paywallOpen, setPaywallOpen] = useState(true);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: u }) => {
+      if (!u.user) return setPaywallOpen(true);
+      const { data: perfil } = await supabase
+        .from("perfiles")
+        .select("suscripcion_activa, suscripcion_hasta")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      const vigente =
+        perfil?.suscripcion_activa &&
+        (!perfil.suscripcion_hasta || new Date(perfil.suscripcion_hasta) > new Date());
+      setPaywallOpen(!vigente);
+    });
+  }, []);
   const [aviso, setAviso] = useState<string | null>(null);
   const fetchArrivals = useServerFn(getArrivals);
   const enviarReporte = useServerFn(reportarViaje);

@@ -46,7 +46,7 @@ async function resolverStop(code: string): Promise<Stop | null> {
       lng: creada.lng,
       sentido: creada.sentido,
       lineas: Array.isArray(creada.lineas) ? (creada.lineas as { linea: string; destino: string }[]) : [],
-      planilla: creada.planilla ?? undefined,
+      ...(creada.planilla ? { planilla: creada.planilla } : {}),
     };
   }
   const { data } = await db
