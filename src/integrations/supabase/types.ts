@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      clientes: {
+        Row: {
+          created_at: string
+          documento: string | null
+          email: string | null
+          id: string
+          llave: string
+          monto: number
+          mp_pago_id: string | null
+          nombre: string | null
+          origen: string
+          pagado_en: string
+          updated_at: string
+          vence: string
+        }
+        Insert: {
+          created_at?: string
+          documento?: string | null
+          email?: string | null
+          id?: string
+          llave: string
+          monto?: number
+          mp_pago_id?: string | null
+          nombre?: string | null
+          origen?: string
+          pagado_en?: string
+          updated_at?: string
+          vence: string
+        }
+        Update: {
+          created_at?: string
+          documento?: string | null
+          email?: string | null
+          id?: string
+          llave?: string
+          monto?: number
+          mp_pago_id?: string | null
+          nombre?: string | null
+          origen?: string
+          pagado_en?: string
+          updated_at?: string
+          vence?: string
+        }
+        Relationships: []
+      }
       horarios_parada: {
         Row: {
           created_at: string
@@ -83,6 +128,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pases_jubilado: {
+        Row: {
+          activo: boolean
+          created_at: string
+          documento: string
+          id: string
+          tipo_documento: string
+          updated_at: string
+          usuario_id: string
+          vence: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          documento: string
+          id?: string
+          tipo_documento?: string
+          updated_at?: string
+          usuario_id: string
+          vence?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          documento?: string
+          id?: string
+          tipo_documento?: string
+          updated_at?: string
+          usuario_id?: string
+          vence?: string
+        }
+        Relationships: []
+      }
       perfiles: {
         Row: {
           created_at: string
@@ -110,6 +188,24 @@ export type Database = {
           suscripcion_activa?: boolean
           suscripcion_hasta?: string | null
           ultimo_acceso?: string
+        }
+        Relationships: []
+      }
+      pruebas_cortesia: {
+        Row: {
+          huella: string
+          inicio: string
+          llave: string
+        }
+        Insert: {
+          huella: string
+          inicio?: string
+          llave: string
+        }
+        Update: {
+          huella?: string
+          inicio?: string
+          llave?: string
         }
         Relationships: []
       }
