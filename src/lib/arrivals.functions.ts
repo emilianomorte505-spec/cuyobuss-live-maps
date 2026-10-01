@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findStop, arribosBase, type Arrival, type Stop } from "./stops";
 import { horariosDe, proximosMinutos, desvioRespectoPlanilla, type Horarios } from "./timetables";
 import type { Database } from "@/integrations/supabase/types";
@@ -349,22 +348,28 @@ export const getArrivals = createServerFn({ method: "POST" })
  * atraso o adelanto para que las paradas siguientes lo muestren al instante.
  */
 export const reportarViaje = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { stopId: string; linea: string }) => {
+  .inputValidator((input: { stopId: string; linea: string; llave: string }) => {
     if (!input || typeof input.stopId !== "string" || typeof input.linea !== "string") {
       throw new Error("Datos inválidos");
     }
-    return { stopId: input.stopId.toLowerCase().slice(0, 80), linea: input.linea.slice(0, 10) };
+    const llave = String(input.llave ?? "");
+    if (!/^[a-zA-Z0-9-]{20,64}$/.test(llave)) throw new Error("Llave inválida");
+    return {
+      stopId: input.stopId.toLowerCase().slice(0, 80),
+      linea: input.linea.slice(0, 10),
+      llave,
+    };
   })
   .handler(
     async ({
       data,
-      context,
     }): Promise<{ ok: boolean; desvio: number; mensaje: string }> => {
       const stop = await resolverStop(data.stopId);
       if (!stop) throw new Error("Parada desconocida");
 
-      const { supabase, userId } = context;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const supabase = supabaseAdmin;
+      const userId = data.llave;
 
       const desdeEspera = new Date(Date.now() - ESPERA_ENTRE_REPORTES_MIN * 60_000).toISOString();
       const { data: recientes } = await supabase

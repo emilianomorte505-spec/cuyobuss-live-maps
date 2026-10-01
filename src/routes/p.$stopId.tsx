@@ -51,9 +51,5 @@ export const Route = createFileRoute("/p/$stopId")({
 
 function StopRoute() {
   const { stop } = Route.useLoaderData();
-  return (
-    <AuthGate>
-      <StopPage stop={stop} />
-    </AuthGate>
-  );
+  return <StopPage stop={stop} />;
 }
