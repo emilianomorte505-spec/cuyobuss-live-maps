@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as PStopIdRouteImport } from './routes/p.$stopId'
+import { Route as ApiPublicMercadopagoRouteImport } from './routes/api/public/mercadopago'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +25,65 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PStopIdRoute = PStopIdRouteImport.update({
   id: '/p/$stopId',
   path: '/p/$stopId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMercadopagoRoute = ApiPublicMercadopagoRouteImport.update({
+  id: '/api/public/mercadopago',
+  path: '/api/public/mercadopago',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/clientes': typeof ClientesRoute
   '/p/$stopId': typeof PStopIdRoute
+  '/api/public/mercadopago': typeof ApiPublicMercadopagoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/clientes': typeof ClientesRoute
   '/p/$stopId': typeof PStopIdRoute
+  '/api/public/mercadopago': typeof ApiPublicMercadopagoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/clientes': typeof ClientesRoute
   '/p/$stopId': typeof PStopIdRoute
+  '/api/public/mercadopago': typeof ApiPublicMercadopagoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/p/$stopId'
+  fullPaths:
+    '/' | '/admin' | '/clientes' | '/p/$stopId' | '/api/public/mercadopago'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/p/$stopId'
-  id: '__root__' | '/' | '/admin' | '/p/$stopId'
+  to: '/' | '/admin' | '/clientes' | '/p/$stopId' | '/api/public/mercadopago'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/clientes'
+    | '/p/$stopId'
+    | '/api/public/mercadopago'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ClientesRoute: typeof ClientesRoute
   PStopIdRoute: typeof PStopIdRoute
+  ApiPublicMercadopagoRoute: typeof ApiPublicMercadopagoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +102,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$stopId': {
       id: '/p/$stopId'
       path: '/p/$stopId'
       fullPath: '/p/$stopId'
       preLoaderRoute: typeof PStopIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mercadopago': {
+      id: '/api/public/mercadopago'
+      path: '/api/public/mercadopago'
+      fullPath: '/api/public/mercadopago'
+      preLoaderRoute: typeof ApiPublicMercadopagoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +129,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ClientesRoute: ClientesRoute,
   PStopIdRoute: PStopIdRoute,
+  ApiPublicMercadopagoRoute: ApiPublicMercadopagoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
