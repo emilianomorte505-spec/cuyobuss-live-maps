@@ -1,7 +1,9 @@
 # Roadmap Cuyobuss
 
 - [x] Pase gratuito mayores de 57 (corte por número de DNI)
-- [ ] Acceso sin login en la parada (llave por celular)
+- [x] Acceso sin login en la parada (llave por celular)
+- [x] Pase gratuito para mayores de 57 visible y activable desde la creación de cuenta
+- [x] Creador de paradas exclusivo para administradores en /admin
 - [ ] Cobro Mercado Pago en modo prueba (infraestructura completa, se activa al cargar el Access Token)
 - [ ] Webhook de Mercado Pago que crea el cliente automáticamente
 - [ ] Listado de clientes y cobros para el admin

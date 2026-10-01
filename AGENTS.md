@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Consumer passes are bound to a persistent device key so paid and 57+ access survives reloads without requiring account login.

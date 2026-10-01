@@ -18,6 +18,12 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 .auth-msg{margin-top:16px;padding:11px 13px;border-radius:12px;background:#315c400f;color:#31463a;font-size:13px;line-height:1.45}
 .auth-btn{margin-top:24px}
 .logout{border:0;background:transparent;color:#3f4a43;font:700 12px "DM Sans";cursor:pointer;text-decoration:underline}
+.auth-free-pass{margin-top:24px;padding-top:22px;border-top:1px solid var(--line);color:var(--ink)}
+.auth-free-pass strong{font:800 17px Manrope,sans-serif}
+.auth-free-pass p{margin-top:6px;color:#3f4a43;font-size:13px;line-height:1.45}
+.auth-free-pass .auth-label{display:block}
+.auth-free-pass-button{width:100%;margin-top:12px}
+.auth-free-pass-button:disabled{cursor:default;opacity:.5}
 
 .admin-input{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:14px;font:600 16px Manrope,sans-serif;margin:16px 0 4px;background:#fff;color:#1d1b16}
 .admin-btn{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font:700 11px Manrope,sans-serif;cursor:pointer;text-align:center;color:inherit;text-decoration:none;white-space:nowrap}

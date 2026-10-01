@@ -1,12 +1,25 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { estadoAcceso, paseMayor } from "@/lib/acceso.functions";
 import { CuyobussLogo } from "./CuyobussLogo";
+
+function llaveDelDispositivo() {
+  let llave = localStorage.getItem("cuyobuss_llave");
+  if (!llave) {
+    llave = crypto.randomUUID();
+    localStorage.setItem("cuyobuss_llave", llave);
+  }
+  return llave;
+}
 
 /** Muestra el inicio de sesión antes que cualquier otra cosa. */
 export function AuthGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [paseDispositivo, setPaseDispositivo] = useState(false);
   const [cargando, setCargando] = useState(true);
+  const consultarEstado = useServerFn(estadoAcceso);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_evento, sesion) => {
@@ -15,7 +28,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
     });
     supabase.auth.getSession().then(({ data: { session: sesion } }) => {
       setSession(sesion);
-      setCargando(false);
+      consultarEstado({ data: { llave: llaveDelDispositivo() } })
+        .then((estado) => setPaseDispositivo(estado.vigente))
+        .finally(() => setCargando(false));
     });
     return () => data.subscription.unsubscribe();
   }, []);
@@ -28,18 +43,43 @@ export function AuthGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!session) return <AuthForm />;
+  if (!session && !paseDispositivo) {
+    return <AuthForm onPaseActivado={() => setPaseDispositivo(true)} />;
+  }
 
   return <>{children}</>;
 }
 
-function AuthForm() {
+function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
   const [modo, setModo] = useState<"entrar" | "crear">("crear");
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [documento, setDocumento] = useState("");
+  const [mensajePase, setMensajePase] = useState<string | null>(null);
+  const [verificandoPase, setVerificandoPase] = useState(false);
+  const activarPase = useServerFn(paseMayor);
+
+  async function verificarPase() {
+    setMensajePase(null);
+    setVerificandoPase(true);
+    try {
+      const resultado = await activarPase({
+        data: { llave: llaveDelDispositivo(), documento },
+      });
+      if (resultado.ok) {
+        onPaseActivado();
+        return;
+      }
+      setMensajePase(resultado.motivo);
+    } catch {
+      setMensajePase("No pudimos verificar el DNI. Probá de nuevo.");
+    } finally {
+      setVerificandoPase(false);
+    }
+  }
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -146,6 +186,33 @@ function AuthForm() {
         >
           {modo === "entrar" ? "No tengo cuenta, quiero crearla" : "Ya tengo cuenta, quiero entrar"}
         </button>
+
+        <div className="auth-free-pass">
+          <strong>¿Tenés 57 años o más?</strong>
+          <p>Tu pase es gratuito. Ingresá tu DNI o CUIL y accedé sin pagar.</p>
+          <label className="auth-label" htmlFor="dni-mayor">
+            DNI o CUIL
+          </label>
+          <input
+            id="dni-mayor"
+            className="auth-input"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={11}
+            placeholder="Ej: 10234567"
+            value={documento}
+            onChange={(e) => setDocumento(e.target.value.replace(/\D/g, "").slice(0, 11))}
+          />
+          {mensajePase && <p className="auth-msg">{mensajePase}</p>}
+          <button
+            className="secondary auth-free-pass-button"
+            type="button"
+            disabled={verificandoPase || documento.length < 7}
+            onClick={() => void verificarPase()}
+          >
+            {verificandoPase ? "Verificando…" : "Verificar y activar pase gratis"}
+          </button>
+        </div>
       </form>
     </div>
   );
