@@ -124,7 +124,11 @@ function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
         <h1 className="auth-title">
           {modo === "entrar" ? "Entrá a tu cuenta" : "Creá tu cuenta"}
         </h1>
-        <p className="auth-sub">Con tu correo y una contraseña alcanza.</p>
+        <p className="auth-sub">
+          {modo === "crear"
+            ? "Creá tu cuenta y probá 3 minutos gratis. Después, activá tu pase."
+            : "Con tu correo y una contraseña alcanza."}
+        </p>
 
         {modo === "crear" && (
           <>
