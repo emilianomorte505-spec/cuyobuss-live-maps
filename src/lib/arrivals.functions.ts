@@ -125,11 +125,25 @@ function aplicarDesvios(arribos: Arrival[], desvios: Map<string, number>): Arriv
   return arribos.map((a) => {
     const desvio = desvios.get(a.linea);
     if (desvio === undefined || desvio === 0 || a.minutos < 0) return a;
+    const estado = desvio > 0 ? ("Demorado" as const) : ("Adelantado" as const);
+    const conDesvio = a.minutos + desvio;
+    // Si ese colectivo ya pasó (quedó en 0 o menos), saltamos al siguiente horario.
+    if (conDesvio <= 0) {
+      const siguiente = a.minutosProximo >= 0 ? a.minutosProximo + desvio : -1;
+      return {
+        ...a,
+        minutos: siguiente > 0 ? siguiente : -1,
+        minutosProximo: -1,
+        estado: siguiente > 0 ? estado : ("Sin datos" as const),
+        desvio,
+        reportado: true,
+      };
+    }
     return {
       ...a,
-      minutos: Math.max(0, a.minutos + desvio),
+      minutos: conDesvio,
       minutosProximo: a.minutosProximo < 0 ? -1 : Math.max(0, a.minutosProximo + desvio),
-      estado: desvio > 0 ? ("Demorado" as const) : ("Adelantado" as const),
+      estado,
       desvio,
       reportado: true,
     };
