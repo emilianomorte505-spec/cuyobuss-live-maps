@@ -101,6 +101,7 @@ export const iniciarPago = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const token = process.env["MERCADOPAGO_ACCESS_TOKEN"];
     const db = await admin();
+    data = { ...data, llave: await llaveEfectiva(data.llave) };
 
     if (!token) {
       const vence = new Date(Date.now() + DIAS * 86400000).toISOString();
