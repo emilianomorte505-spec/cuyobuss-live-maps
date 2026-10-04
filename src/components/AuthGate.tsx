@@ -52,7 +52,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
 function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
   const [modo, setModo] = useState<"entrar" | "crear">("crear");
-  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -93,7 +92,7 @@ function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin, data: { nombre } },
+          options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
         if (!data.session) {
@@ -130,22 +129,6 @@ function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
             : "Con tu correo y una contraseña alcanza."}
         </p>
 
-        {modo === "crear" && (
-          <>
-            <label className="auth-label" htmlFor="nombre">
-              Tu nombre
-            </label>
-            <input
-              id="nombre"
-              className="auth-input"
-              autoComplete="name"
-              required
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Damián"
-            />
-          </>
-        )}
         <label className="auth-label" htmlFor="email">
           Correo
         </label>
