@@ -52,7 +52,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
 function AuthForm({ onPaseActivado }: { onPaseActivado: () => void }) {
   const [modo, setModo] = useState<"entrar" | "crear">("crear");
-  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState<string | null>(null);
