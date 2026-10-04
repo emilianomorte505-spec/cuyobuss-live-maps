@@ -120,7 +120,7 @@ export function StopPage({ stop }: { stop: Stop }) {
     return () => clearInterval(t);
   }, [finPrueba, vigente]);
   const restante = !vigente && finPrueba ? ahora : 0;
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ mensaje: string; ok: boolean } | null>(null);
   const fetchArrivals = useServerFn(getArrivals);
   const enviarReporte = useServerFn(reportarViaje);
   const claveArribos = `cuyobuss_arribos_${stop.code}`;
@@ -149,10 +149,11 @@ export function StopPage({ stop }: { stop: Stop }) {
     mutationFn: (linea: string) =>
       enviarReporte({ data: { stopId: stop.code, linea, llave: llave ?? "" } }),
     onSuccess: (res) => {
-      setAviso(res.mensaje);
-      void refetch();
+      setAviso({ mensaje: res.mensaje, ok: res.ok });
+      if (res.ok) void refetch();
     },
-    onError: () => setAviso("No pudimos registrar tu aviso. Probá de nuevo."),
+    onError: () =>
+      setAviso({ mensaje: "No pudimos registrar tu aviso. Probá de nuevo.", ok: false }),
   });
   const arribos: Arrival[] = data?.arribos ?? arribosBase(stop);
   const fuente = data?.fuente;
@@ -192,18 +193,13 @@ export function StopPage({ stop }: { stop: Stop }) {
 
         <main>
           {restante > 0 && (
-            <div
-              className="detail"
-              role="status"
-              style={{ marginBottom: 12, color: "#a63a22", fontWeight: 800 }}
-            >
+            <div className="trial-notice" role="status">
               ⏱ Prueba de cortesía: te quedan {Math.floor(restante / 60)}:
               {String(restante % 60).padStart(2, "0")} min ·{" "}
               <button
                 type="button"
-                className="logout"
+                className="logout trial-action"
                 onClick={() => setPaywallOpen(true)}
-                style={{ fontWeight: 800 }}
               >
                 Activar pase
               </button>
@@ -225,12 +221,9 @@ export function StopPage({ stop }: { stop: Stop }) {
           </div>
 
           {aviso && (
-            <div
-              className="detail"
-              style={{ marginBottom: 12, color: "#2b6b40", fontWeight: 700 }}
-              role="status"
-            >
-              {aviso}
+            <div className={`ride-alert ${aviso.ok ? "ride-alert-success" : "ride-alert-warning"}`} role={aviso.ok ? "status" : "alert"}>
+              <span className="ride-alert-icon" aria-hidden="true">{aviso.ok ? "✓" : "!"}</span>
+              <span>{aviso.mensaje}</span>
             </div>
           )}
 
@@ -243,51 +236,28 @@ export function StopPage({ stop }: { stop: Stop }) {
                   <div className="dest">{b.destino}</div>
                   <button
                     type="button"
+                    className="board-button"
                     disabled={reporte.isPending || !llave}
                     onClick={() => {
                       setAviso(null);
                       reporte.mutate(b.linea);
                     }}
-                    style={{
-                      marginTop: 8,
-                      border: "1.5px solid #315c40",
-                      background: "#315c400f",
-                      borderRadius: 999,
-                      padding: "6px 12px",
-                      font: "700 11px Manrope, sans-serif",
-                      letterSpacing: "0.4px",
-                      cursor: "pointer",
-                      opacity: reporte.isPending || !llave ? 0.5 : 1,
-                      color: "#1c2823",
-                    }}
                   >
-                    Me subí al {b.linea}
+                    {reporte.isPending ? "Enviando…" : `Me subí al ${b.linea}`}
                   </button>
                 </div>
                 <div>
                   <div className="mins">{b.minutos < 0 ? "—" : `${b.minutos} min`}</div>
-                  <div
-                    className="status"
-                    style={{
-                      color:
-                        b.estado === "A tiempo"
-                          ? "#2b6b40"
-                          : b.estado === "Demorado"
-                            ? "#a63a22"
-                            : b.estado === "Adelantado"
-                              ? "#2b6b40"
-                              : "#4a544d",
-                    }}
-                  >
+                  <div className={`status status-${b.estado.toLowerCase().replace(" ", "-")}`}>
                     {b.estado === "Sin datos" ? "Buscando horario" : b.estado}
                   </div>
                   {b.reportado && b.desvio !== undefined && b.desvio !== 0 && (
-                    <div className="status" style={{ color: "#a63a22" }}>
+                    <div className={`status reported-status ${b.desvio > 0 ? "reported-late" : "reported-early"}`}>
                       {b.desvio > 0 ? `+${b.desvio}` : b.desvio} min · avisado a bordo
                     </div>
                   )}
                   {b.minutosProximo >= 0 && (
-                    <div className="status" style={{ color: "#4a544d" }}>
+                    <div className="status next-arrival">
                       después: {b.minutosProximo} min
                     </div>
                   )}

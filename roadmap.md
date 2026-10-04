@@ -4,6 +4,8 @@
 - [x] Acceso sin login en la parada (llave por celular)
 - [x] Pase gratuito para mayores de 57 visible y activable desde la creación de cuenta
 - [x] Creador de paradas exclusivo para administradores en /admin
+- [x] Contraste reforzado para lectura al sol en la pantalla de parada
+- [x] Avisos a bordo claros, destacados y sin mensajes técnicos
 - [ ] Cobro Mercado Pago en modo prueba (infraestructura completa, se activa al cargar el Access Token)
 - [ ] Webhook de Mercado Pago que crea el cliente automáticamente
 - [ ] Listado de clientes y cobros para el admin

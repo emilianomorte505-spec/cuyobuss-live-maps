@@ -409,7 +409,12 @@ export const reportarViaje = createServerFn({ method: "POST" })
 
       const resultado = desvioRespectoPlanilla(horarios, new Date());
       if (!resultado) {
-        return { ok: false, desvio: 0, mensaje: "No encontramos una pasada cercana en la planilla." };
+        return {
+          ok: false,
+          desvio: 0,
+          mensaje:
+            "No pudimos identificar ese colectivo en este momento. Los horarios no se modificaron.",
+        };
       }
 
       const { error } = await supabase.from("reportes_viaje").insert({
@@ -423,7 +428,11 @@ export const reportarViaje = createServerFn({ method: "POST" })
 
       if (error) {
         console.error("reportes_viaje", error.message);
-        return { ok: false, desvio: 0, mensaje: "No pudimos guardar tu aviso, probá de nuevo." };
+        return {
+          ok: false,
+          desvio: 0,
+          mensaje: "No pudimos guardar tu aviso. Los horarios no se modificaron; probá de nuevo.",
+        };
       }
 
       const mensaje =
