@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Consumer passes are bound to a persistent device key so paid and 57+ access survives reloads without requiring account login.
+- Passenger-facing feedback uses plain language and visually distinct success or warning states because it must be understood quickly outdoors.
