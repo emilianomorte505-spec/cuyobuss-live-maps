@@ -34,3 +34,18 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 .admin-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .admin-chip{border:1px solid var(--line);background:#fff;color:#1d1b16;border-radius:999px;padding:8px 14px;font:700 13px Manrope,sans-serif;cursor:pointer}
 .admin-chip.on{background:#1d1b16;color:#fff;border-color:#1d1b16}
+
+/* Contraste reforzado para leer al sol */
+:root{--muted:#26302a;--line:#17211b80}
+.auth-input::placeholder,.admin-input::placeholder{color:#55615a;opacity:1}
+.auth-sub,.auth-free-pass p,.price small,.cancel,.secure,.logout,.admin-result span{color:#26302a}
+.auth-label,.eyebrow,.plan-label{color:#1f4a2f}
+.auth-loading{color:#fff;font-weight:700}
+.story p{color:#f4f7f5}
+.live{color:#1f4a2f;border-color:#17211b80}
+.secondary{color:#17211b;border-color:#17211b}
+.board-button{border-color:#1f4a2f}
+.board-button:disabled,.auth-free-pass-button:disabled{opacity:.75}
+.admin-chip.on{background:var(--ink);color:var(--lime);border-color:var(--ink)}
+.route{color:var(--lime);text-shadow:none}
+.auth-msg{color:#17211b;font-weight:600}
