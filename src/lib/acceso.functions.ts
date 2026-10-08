@@ -31,7 +31,7 @@ async function llaveEfectiva(llave: string) {
   return (await llaveDeCuenta()) ?? llave;
 }
 
-export const PRUEBA_SEGUNDOS = 180;
+export const PRUEBA_SEGUNDOS = 30;
 const CUPO_POR_HUELLA = 3;
 
 /** Pase vigente de la cuenta o del celular; si no, una única prueba de cortesía por cuenta. */
