@@ -31,6 +31,8 @@ type ParadaDb = { code: string; nombre: string; sentido: string; lineas: LineaSe
 
 const SENTIDOS = ["Hacia el Centro", "Hacia el Norte", "Hacia el Sur", "Hacia el Este", "Hacia el Oeste"];
 const SAN_JUAN = { lat: -31.5375, lng: -68.5364 };
+// Dirección pública definitiva: la que se graba en los tags NFC.
+const ORIGEN_PUBLICO = "https://cuyobuss-live-maps.lovable.app";
 
 const slugify = (t: string) =>
   t
