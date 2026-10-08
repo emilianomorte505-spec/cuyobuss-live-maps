@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { ubicarEsquina } from "@/lib/geocode.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthGate } from "@/components/AuthGate";
 import { CuyobussLogo } from "@/components/CuyobussLogo";
@@ -61,29 +63,9 @@ function AdminGate() {
   return <Admin />;
 }
 
-declare global {
-  interface Window {
-    google?: any;
-    __cuyoMapa?: () => void;
-  }
-}
-
-function cargarMapa(): Promise<void> {
-  if (window.google?.maps) return Promise.resolve();
-  return new Promise((resolve) => {
-    window.__cuyoMapa = () => resolve();
-    const key = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'];
-    const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=__cuyoMapa`;
-    s.async = true;
-    document.head.appendChild(s);
-  });
-}
-
 function Admin() {
-  const mapaRef = useRef<HTMLDivElement>(null);
-  const marcador = useRef<any>(null);
-  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
+  const ubicar = useServerFn(ubicarEsquina);
+  const [pos, setPos] = useState<{ lat: number; lng: number }>(SAN_JUAN);
   const [nombre, setNombre] = useState("");
   const [code, setCode] = useState("");
   const [codeTocado, setCodeTocado] = useState(false);
@@ -107,22 +89,21 @@ function Admin() {
   useEffect(() => {
     setOrigen(window.location.origin);
     void cargarParadas();
-    cargarMapa().then(() => {
-      if (!mapaRef.current) return;
-      const g = window.google;
-      const mapa = new g.maps.Map(mapaRef.current, { center: SAN_JUAN, zoom: 14, clickableIcons: false, streetViewControl: false });
-      mapa.addListener("click", (e: any) => {
-        const p = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-        if (!marcador.current) marcador.current = new g.maps.Marker({ map: mapa });
-        marcador.current.setPosition(p);
-        setPos(p);
-      });
-    });
   }, []);
 
   useEffect(() => {
     if (!codeTocado) setCode(slugify(nombre));
   }, [nombre, codeTocado]);
+
+  // Ubica el poste automáticamente según el nombre de la esquina.
+  useEffect(() => {
+    const texto = nombre.trim();
+    if (texto.length < 4) return setPos(SAN_JUAN);
+    const t = setTimeout(() => {
+      ubicar({ data: { texto } }).then((p) => setPos({ lat: p.lat, lng: p.lng })).catch(() => setPos(SAN_JUAN));
+    }, 700);
+    return () => clearTimeout(t);
+  }, [nombre]);
 
   useEffect(() => {
     const texto = q.trim();
@@ -155,7 +136,6 @@ function Admin() {
 
   const guardar = async () => {
     setMsg(null);
-    if (!pos) return setMsg({ ok: false, t: "Tocá el mapa para marcar dónde está la parada." });
     if (!nombre.trim() || !code) return setMsg({ ok: false, t: "Poné el nombre de la parada." });
     if (lineas.length === 0) return setMsg({ ok: false, t: "Elegí al menos una línea." });
     const { error } = await supabase.from("paradas").insert({
@@ -203,8 +183,6 @@ function Admin() {
         <div className="eyebrow">Nueva parada</div>
         <h1 className="stop-name">Creá una parada</h1>
 
-        <div className="section-title"><h2>1. Tocá el mapa donde está el poste</h2><span>{pos ? "Marcada ✓" : "Sin marcar"}</span></div>
-        <div ref={mapaRef} className="admin-map" />
 
         <div className="section-title"><h2>2. Buscá la parada en las planillas</h2><span>sugiere las líneas</span></div>
         <input className="admin-input" placeholder="Ej: agustin gomez acha" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -219,6 +197,9 @@ function Admin() {
         <div className="section-title"><h2>3. Datos de la parada</h2></div>
         <label className="auth-label">Nombre</label>
         <input className="admin-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Agustín Gómez y Gral. Acha Sur" />
+        <div className="detail">Ubicación del poste (automática según el nombre):</div>
+        <iframe title="Ubicación del poste" className="admin-map" style={{ border: 0, width: "100%" }} loading="lazy"
+          src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"]}&q=${pos.lat},${pos.lng}&zoom=17`} />
         <label className="auth-label">Enlace del tag</label>
         <input className="admin-input" value={code} onChange={(e) => { setCodeTocado(true); setCode(slugify(e.target.value)); }} />
         <div className="detail">{origen}/p/{code || "…"}</div>
