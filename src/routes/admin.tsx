@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { ubicarEsquina } from "@/lib/geocode.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthGate } from "@/components/AuthGate";
 import { CuyobussLogo } from "@/components/CuyobussLogo";
@@ -59,25 +61,6 @@ function AdminGate() {
       </div>
     );
   return <Admin />;
-}
-
-declare global {
-  interface Window {
-    google?: any;
-    __cuyoMapa?: () => void;
-  }
-}
-
-function cargarMapa(): Promise<void> {
-  if (window.google?.maps) return Promise.resolve();
-  return new Promise((resolve) => {
-    window.__cuyoMapa = () => resolve();
-    const key = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'];
-    const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=__cuyoMapa`;
-    s.async = true;
-    document.head.appendChild(s);
-  });
 }
 
 function Admin() {
@@ -153,7 +136,6 @@ function Admin() {
 
   const guardar = async () => {
     setMsg(null);
-    if (!pos) return setMsg({ ok: false, t: "Tocá el mapa para marcar dónde está la parada." });
     if (!nombre.trim() || !code) return setMsg({ ok: false, t: "Poné el nombre de la parada." });
     if (lineas.length === 0) return setMsg({ ok: false, t: "Elegí al menos una línea." });
     const { error } = await supabase.from("paradas").insert({
@@ -215,6 +197,9 @@ function Admin() {
         <div className="section-title"><h2>3. Datos de la parada</h2></div>
         <label className="auth-label">Nombre</label>
         <input className="admin-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Agustín Gómez y Gral. Acha Sur" />
+        <div className="detail">Ubicación del poste (automática según el nombre):</div>
+        <iframe title="Ubicación del poste" className="admin-map" style={{ border: 0, width: "100%" }} loading="lazy"
+          src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"]}&q=${pos.lat},${pos.lng}&zoom=17`} />
         <label className="auth-label">Enlace del tag</label>
         <input className="admin-input" value={code} onChange={(e) => { setCodeTocado(true); setCode(slugify(e.target.value)); }} />
         <div className="detail">{origen}/p/{code || "…"}</div>
