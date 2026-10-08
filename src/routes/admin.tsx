@@ -31,6 +31,8 @@ type ParadaDb = { code: string; nombre: string; sentido: string; lineas: LineaSe
 
 const SENTIDOS = ["Hacia el Centro", "Hacia el Norte", "Hacia el Sur", "Hacia el Este", "Hacia el Oeste"];
 const SAN_JUAN = { lat: -31.5375, lng: -68.5364 };
+// Dirección pública definitiva: la que se graba en los tags NFC.
+const ORIGEN_PUBLICO = "https://cuyobuss-live-maps.lovable.app";
 
 const slugify = (t: string) =>
   t
@@ -79,7 +81,7 @@ function Admin() {
   const [paradas, setParadas] = useState<ParadaDb[]>([]);
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
-  const [origen, setOrigen] = useState("");
+  const origen = ORIGEN_PUBLICO;
 
   const cargarParadas = async () => {
     const { data } = await supabase.from("paradas").select("code, nombre, sentido, lineas").order("created_at", { ascending: false });
@@ -87,7 +89,6 @@ function Admin() {
   };
 
   useEffect(() => {
-    setOrigen(window.location.origin);
     void cargarParadas();
   }, []);
 
