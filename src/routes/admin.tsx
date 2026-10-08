@@ -81,7 +81,7 @@ function Admin() {
   const [paradas, setParadas] = useState<ParadaDb[]>([]);
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
-  const [origen, setOrigen] = useState("");
+  const origen = ORIGEN_PUBLICO;
 
   const cargarParadas = async () => {
     const { data } = await supabase.from("paradas").select("code, nombre, sentido, lineas").order("created_at", { ascending: false });
@@ -89,7 +89,6 @@ function Admin() {
   };
 
   useEffect(() => {
-    setOrigen(window.location.origin);
     void cargarParadas();
   }, []);
 
