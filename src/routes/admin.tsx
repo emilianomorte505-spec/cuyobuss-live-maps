@@ -81,9 +81,8 @@ function cargarMapa(): Promise<void> {
 }
 
 function Admin() {
-  const mapaRef = useRef<HTMLDivElement>(null);
-  const marcador = useRef<any>(null);
-  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
+  const ubicar = useServerFn(ubicarEsquina);
+  const [pos, setPos] = useState<{ lat: number; lng: number }>(SAN_JUAN);
   const [nombre, setNombre] = useState("");
   const [code, setCode] = useState("");
   const [codeTocado, setCodeTocado] = useState(false);
@@ -107,22 +106,21 @@ function Admin() {
   useEffect(() => {
     setOrigen(window.location.origin);
     void cargarParadas();
-    cargarMapa().then(() => {
-      if (!mapaRef.current) return;
-      const g = window.google;
-      const mapa = new g.maps.Map(mapaRef.current, { center: SAN_JUAN, zoom: 14, clickableIcons: false, streetViewControl: false });
-      mapa.addListener("click", (e: any) => {
-        const p = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-        if (!marcador.current) marcador.current = new g.maps.Marker({ map: mapa });
-        marcador.current.setPosition(p);
-        setPos(p);
-      });
-    });
   }, []);
 
   useEffect(() => {
     if (!codeTocado) setCode(slugify(nombre));
   }, [nombre, codeTocado]);
+
+  // Ubica el poste automáticamente según el nombre de la esquina.
+  useEffect(() => {
+    const texto = nombre.trim();
+    if (texto.length < 4) return setPos(SAN_JUAN);
+    const t = setTimeout(() => {
+      ubicar({ data: { texto } }).then((p) => setPos({ lat: p.lat, lng: p.lng })).catch(() => setPos(SAN_JUAN));
+    }, 700);
+    return () => clearTimeout(t);
+  }, [nombre]);
 
   useEffect(() => {
     const texto = q.trim();
@@ -203,8 +201,6 @@ function Admin() {
         <div className="eyebrow">Nueva parada</div>
         <h1 className="stop-name">Creá una parada</h1>
 
-        <div className="section-title"><h2>1. Tocá el mapa donde está el poste</h2><span>{pos ? "Marcada ✓" : "Sin marcar"}</span></div>
-        <div ref={mapaRef} className="admin-map" />
 
         <div className="section-title"><h2>2. Buscá la parada en las planillas</h2><span>sugiere las líneas</span></div>
         <input className="admin-input" placeholder="Ej: agustin gomez acha" value={q} onChange={(e) => setQ(e.target.value)} />
