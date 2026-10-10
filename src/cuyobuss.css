@@ -49,7 +49,7 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 .admin-chip.on{background:var(--ink);color:var(--lime);border-color:var(--ink)}
 .route{color:var(--lime);text-shadow:none}
 .auth-msg{color:#17211b;font-weight:600}
-.detail,.detail svg,.bus-line,.section-title span,.sub,.next-arrival{color:var(--muted)}
+.detail,.detail svg,.bus-line,.section-title span,.sub{color:var(--muted)}
 
 /* Destino desde el poste actual */
 .destination-section{margin-top:44px;border-top:1px solid var(--line);padding-top:4px;letter-spacing:0}
