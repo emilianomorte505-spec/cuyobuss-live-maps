@@ -60,7 +60,7 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 .destination-label{display:block;margin-bottom:7px;font-size:13px;font-weight:800;color:var(--ink)}
 .destination-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
 .destination-input{width:100%;min-width:0;height:46px;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper);color:var(--ink);font:500 15px "DM Sans",sans-serif}
-.destination-input::placeholder{color:var(--ink);opacity:.75}
+.destination-input::placeholder{color:var(--cb-muted-soft);opacity:1}
 .destination-input:focus{outline:2px solid var(--moss);outline-offset:2px}
 .destination-button{height:46px;background:var(--ink);color:var(--lime);border-radius:8px;font-weight:800}
 .destination-button:hover{background:var(--moss)}
