@@ -7,6 +7,7 @@ import { getArrivals, reportarViaje } from "@/lib/arrivals.functions";
 import { estadoAcceso, iniciarPago, paseMayor } from "@/lib/acceso.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 import { huellaDispositivo } from "@/lib/huella";
+import { DestinationMap } from "./DestinationMap";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -266,6 +267,7 @@ export function StopPage({ stop }: { stop: Stop }) {
             ))}
           </div>
 
+          <DestinationMap key={stop.code} stop={stop} />
         </main>
 
         <footer>
