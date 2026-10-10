@@ -1,6 +1,6 @@
 # Roadmap Cuyobuss
 
-- [ ] Mapa debajo de los arribos para buscar destino y consultar líneas desde la parada actual
+- [x] Mapa debajo de los arribos para buscar destino y consultar líneas desde la parada actual (Google Maps pendiente de validar en la dirección pública)
 
 - [x] Pase gratuito mayores de 57 (corte por número de DNI)
 - [x] Acceso sin login en la parada (llave por celular)
