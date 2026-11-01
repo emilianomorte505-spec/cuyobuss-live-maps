@@ -1,13 +1,13 @@
 import { Fragment, useEffect, useState } from "react";
 
 /** Keeps the real text in the layout while the cipher overlays each letter. */
-export function ScrambleText({ text }: { text: string }) {
+export function ScrambleText({ text, active = true }: { text: string; active?: boolean }) {
   const [cipher, setCipher] = useState<string[] | null>(null);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const letters = Array.from(text);
-    const started = performance.now();
+    const started = performance.now() + 300;
     let timer: ReturnType<typeof setInterval> | undefined;
 
     const stop = () => {
@@ -15,7 +15,9 @@ export function ScrambleText({ text }: { text: string }) {
       setCipher(null);
     };
     const update = () => {
-      const progress = Math.min(1, (performance.now() - started) / 900);
+      const elapsed = performance.now() - started;
+      if (elapsed < 0) return;
+      const progress = Math.min(1, elapsed / 1800);
       if (preference.matches || progress >= 1) {
         stop();
         return;
@@ -27,7 +29,8 @@ export function ScrambleText({ text }: { text: string }) {
       }));
     };
 
-    if (!preference.matches) {
+    setCipher(null);
+    if (active && !preference.matches) {
       timer = setInterval(update, 70);
       update();
     }
@@ -36,7 +39,7 @@ export function ScrambleText({ text }: { text: string }) {
       if (timer !== undefined) clearInterval(timer);
       preference.removeEventListener("change", stop);
     };
-  }, [text]);
+  }, [text, active]);
 
   let offset = 0;
   return (
