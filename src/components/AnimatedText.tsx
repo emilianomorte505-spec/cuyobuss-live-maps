@@ -23,7 +23,7 @@ export function ScrambleText({ text }: { text: string }) {
       setCipher(letters.map((letter, index) => {
         if (/\s/u.test(letter) || index / letters.length < progress) return letter;
         const alphabet = letter === letter.toUpperCase() ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "abcdefghijklmnopqrstuvwxyz";
-        return alphabet[Math.floor(Math.random() * alphabet.length)];
+        return alphabet[Math.floor(Math.random() * alphabet.length)] ?? letter;
       }));
     };
 
