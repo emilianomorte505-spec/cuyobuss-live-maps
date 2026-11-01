@@ -8,6 +8,7 @@ import { estadoAcceso, iniciarPago, paseMayor } from "@/lib/acceso.functions";
 import { arribosBase, type Arrival, type Stop } from "@/lib/stops";
 import { huellaDispositivo } from "@/lib/huella";
 import { DestinationMap } from "./DestinationMap";
+import { NeonText, ScrambleText } from "./AnimatedText";
 
 export function StopPage({ stop }: { stop: Stop }) {
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -207,7 +208,7 @@ export function StopPage({ stop }: { stop: Stop }) {
             </div>
           )}
           <div className="eyebrow">Tu parada actual</div>
-          <h1 className="stop-name">{stop.nombre}</h1>
+          <h1 className="stop-name"><ScrambleText key={stop.code} text={stop.nombre} /></h1>
           <div className="detail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
@@ -291,7 +292,7 @@ export function StopPage({ stop }: { stop: Stop }) {
               CUYOBUSS
             </div>
             <div className="kicker">Membresía Explorador</div>
-            <h1 id="offerTitle">Que esperar el colectivo no sea prehistórico.</h1>
+            <h1 id="offerTitle"><NeonText active={paywallOpen} text="Que esperar el colectivo no sea prehistórico." /></h1>
             <p>
               Horarios claros para moverte por San Juan con menos incertidumbre y más tiempo para
               vos.
