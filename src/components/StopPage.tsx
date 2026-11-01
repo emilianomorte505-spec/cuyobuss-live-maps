@@ -208,7 +208,7 @@ export function StopPage({ stop }: { stop: Stop }) {
             </div>
           )}
           <div className="eyebrow">Tu parada actual</div>
-          <h1 className="stop-name"><ScrambleText key={stop.code} text={stop.nombre} /></h1>
+          <h1 className="stop-name"><ScrambleText key={stop.code} text={stop.nombre} active={!paywallOpen} /></h1>
           <div className="detail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />

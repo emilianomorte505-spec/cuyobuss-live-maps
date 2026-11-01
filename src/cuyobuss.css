@@ -90,11 +90,11 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 .stop-name{font-size:58px;letter-spacing:0;overflow-wrap:anywhere}
 .story h1{font-size:49px;letter-spacing:0;overflow-wrap:anywhere}
 .neon-text{color:var(--white)}
-.neon-ignite{animation:cb-neon-ignite 900ms ease-out both}
+.neon-ignite{animation:cb-neon-ignite 2400ms ease-out both}
 @keyframes cb-neon-ignite{
-  0%,100%{text-shadow:none}
-  35%{text-shadow:0 0 2px var(--cb-neon-glow),0 0 12px var(--cb-neon-halo)}
-  65%{text-shadow:0 0 1px var(--cb-neon-glow),0 0 5px var(--cb-neon-halo)}
+  0%,18%,36%{color:var(--white);text-shadow:none}
+  12%,28%,48%,72%{color:var(--lime);text-shadow:0 0 3px var(--cb-neon-glow),0 0 14px var(--cb-neon-halo)}
+  100%{color:var(--white);text-shadow:0 0 2px var(--cb-neon-glow),0 0 6px var(--cb-neon-halo)}
 }
 @media(max-width:720px){.stop-name{font-size:42px}.story h1{font-size:36px}}
 @media(max-width:460px){.stop-name{font-size:34px}.story h1{font-size:34px}}
