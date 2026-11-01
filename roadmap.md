@@ -1,6 +1,6 @@
 # Roadmap Cuyobuss
 
-- [ ] Efectos de texto al abrir una parada y al mostrar el pago, legibles en celulares y sin movimiento cuando el pasajero lo solicita
+- [x] Efectos de texto al abrir una parada y al mostrar el pago, legibles en celulares y sin movimiento cuando el pasajero lo solicita
 
 - [x] Mapa debajo de los arribos para buscar destino y consultar líneas desde la parada actual (Google Maps pendiente de validar en la dirección pública)
 
