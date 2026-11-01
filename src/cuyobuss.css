@@ -78,3 +78,28 @@ main{width:min(calc(100% - 40px),680px);margin:auto;padding:62px 0 80px}.eyebrow
 @keyframes destination-spin{to{transform:rotate(360deg)}}
 @media(max-width:460px){.destination-search{grid-template-columns:1fr}.destination-map{height:300px}.destination-route{gap:10px}}
 @media(prefers-reduced-motion:reduce){.destination-spinner{animation:none}}
+
+/* Brief text reveals keep word wrapping, contrast, and letter widths intact. */
+:root{--cb-neon-glow:var(--lime);--cb-neon-halo:var(--moss)}
+.animated-text{letter-spacing:0}
+.animated-word{display:inline-block;max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.scramble-letter{position:relative;display:inline-block}
+.scramble-original{visibility:visible}
+.is-scrambling .scramble-original{visibility:hidden}
+.scramble-cipher{position:absolute;inset:0;display:block;text-align:center;overflow:hidden;color:var(--moss)}
+.stop-name{font-size:58px;letter-spacing:0;overflow-wrap:anywhere}
+.story h1{font-size:49px;letter-spacing:0;overflow-wrap:anywhere}
+.neon-text{color:var(--white)}
+.neon-ignite{animation:cb-neon-ignite 900ms ease-out both}
+@keyframes cb-neon-ignite{
+  0%,100%{text-shadow:none}
+  35%{text-shadow:0 0 2px var(--cb-neon-glow),0 0 12px var(--cb-neon-halo)}
+  65%{text-shadow:0 0 1px var(--cb-neon-glow),0 0 5px var(--cb-neon-halo)}
+}
+@media(max-width:720px){.stop-name{font-size:42px}.story h1{font-size:36px}}
+@media(max-width:460px){.stop-name{font-size:34px}.story h1{font-size:34px}}
+@media(prefers-reduced-motion:reduce){
+  .neon-ignite{animation:none;text-shadow:none}
+  .is-scrambling .scramble-original{visibility:visible}
+  .scramble-cipher{display:none}
+}

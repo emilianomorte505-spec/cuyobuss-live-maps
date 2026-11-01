@@ -12,3 +12,4 @@
 - Consumer passes are bound to a persistent device key so paid and 57+ access survives reloads without requiring account login.
 - Passenger-facing feedback uses plain language and visually distinct success or warning states because it must be understood quickly outdoors.
 - Destination planning lives in a dedicated StopPage section with authenticated, submit-only Google Routes lookups; accept only journeys whose first bus boards at the current post and belongs to its lines, so another nearby stop is never presented as this stop.
+- Passenger heading animations live in AnimatedText, preserve real text dimensions and accessible names, and respect reduced motion; payment effects activate only when the payment dialog is visible to avoid hidden playback.
