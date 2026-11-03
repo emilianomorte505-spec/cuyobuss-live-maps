@@ -59,6 +59,33 @@ export type Database = {
         }
         Relationships: []
       }
+      horarios_import: {
+        Row: {
+          dom: string[] | null
+          linea: string | null
+          lv: string[] | null
+          parada_nombre: string | null
+          parada_slug: string | null
+          sab: string[] | null
+        }
+        Insert: {
+          dom?: string[] | null
+          linea?: string | null
+          lv?: string[] | null
+          parada_nombre?: string | null
+          parada_slug?: string | null
+          sab?: string[] | null
+        }
+        Update: {
+          dom?: string[] | null
+          linea?: string | null
+          lv?: string[] | null
+          parada_nombre?: string | null
+          parada_slug?: string | null
+          sab?: string[] | null
+        }
+        Relationships: []
+      }
       horarios_parada: {
         Row: {
           created_at: string

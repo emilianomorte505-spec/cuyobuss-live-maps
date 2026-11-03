@@ -29,6 +29,13 @@
       "when": 1790874492064,
       "tag": "0003_jubilados_clientes_cortesia",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793677123324,
+      "tag": "0004_staging_horarios",
+      "breakpoints": true
     }
   ]
 }
