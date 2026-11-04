@@ -299,6 +299,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      registrar_reporte: {
+        Args: {
+          _desvio_minutos: number
+          _espera_min?: number
+          _hora_programada: string
+          _linea: string
+          _parada_slug: string
+          _stop_code: string
+          _usuario_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"

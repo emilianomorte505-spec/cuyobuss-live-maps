@@ -414,14 +414,24 @@ export const reportarViaje = createServerFn({ method: "POST" })
         };
       }
 
-      const { error } = await supabase.from("reportes_viaje").insert({
-        usuario_id: userId,
-        linea: data.linea,
-        stop_code: stop.code,
-        parada_slug: stop.planilla ?? null,
-        hora_programada: resultado.programada,
-        desvio_minutos: resultado.desvio,
+      // Guardado atómico: si la persona toca varias veces a la vez, cuenta una sola.
+      const { data: guardado, error } = await supabase.rpc("registrar_reporte", {
+        _usuario_id: userId,
+        _linea: data.linea,
+        _stop_code: stop.code,
+        _parada_slug: stop.planilla ?? "",
+        _hora_programada: resultado.programada,
+        _desvio_minutos: resultado.desvio,
+        _espera_min: ESPERA_ENTRE_REPORTES_MIN,
       });
+
+      if (!error && guardado === false) {
+        return {
+          ok: false,
+          desvio: 0,
+          mensaje: "Ya avisaste hace un rato. Podés volver a avisar en unos minutos.",
+        };
+      }
 
       if (error) {
         console.error("reportes_viaje", error.message);

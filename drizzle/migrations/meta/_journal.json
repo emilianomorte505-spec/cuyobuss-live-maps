@@ -36,6 +36,20 @@
       "when": 1793677123324,
       "tag": "0004_staging_horarios",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793818545675,
+      "tag": "0005_registrar_reporte_atomico",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793818587705,
+      "tag": "0006_registrar_reporte_slug_nulo",
+      "breakpoints": true
     }
   ]
 }
