@@ -1,7 +1,7 @@
 /**
  * Prueba de carga de avisos "Me subí" contra la base real.
  * Uso: bun scripts/carga-me-subi.ts [pasajeros]
- * Cada aviso de prueba usa una llave "cargatest-..." y se borra al terminar.
+ * Usa líneas ficticias L901-L905 y borra todos sus avisos al terminar.
  */
 import { createClient } from "@supabase/supabase-js";
 import { desvioPorLinea } from "../src/lib/reportes";
@@ -10,13 +10,14 @@ const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_
   auth: { persistSession: false },
 });
 const N = Number(process.argv[2] ?? 300);
-const PREFIJO = `cargatest-${Date.now()}-`;
+const llaves = new Set<string>();
+const nueva = () => { const k = crypto.randomUUID(); llaves.add(k); return k; };
 const LINEAS = ["L901", "L902", "L903", "L904", "L905"]; // líneas ficticias, no tocan las reales
 const PARADAS = ["carga-a", "carga-b", "carga-c", "carga-d", "carga-e", "carga-f"];
 
 type Aviso = { usuario_id: string; linea: string; stop_code: string; desvio_minutos: number; hora_programada: string };
 const esperados: Aviso[] = Array.from({ length: N }, (_, i) => ({
-  usuario_id: `${PREFIJO}${String(i).padStart(5, "0")}`,
+  usuario_id: nueva(),
   linea: LINEAS[i % LINEAS.length]!,
   stop_code: PARADAS[i % PARADAS.length]!,
   desvio_minutos: (i % 11) - 3,
@@ -40,7 +41,7 @@ try {
   const { data: guardados, error } = await db
     .from("reportes_viaje")
     .select("usuario_id, linea, stop_code, desvio_minutos, created_at")
-    .like("usuario_id", `${PREFIJO}%`)
+    .in("usuario_id", [...llaves])
     .limit(N + 50);
   ok(!error, "lectura correcta");
   const filas = guardados ?? [];
@@ -62,7 +63,7 @@ try {
 
   // 3) Un pasajero que toca "Me subí" 5 veces a la vez: el tiempo de espera de 20 min
   //    se controla antes de guardar, así que mostramos cuántos entran.
-  const llave = `${PREFIJO}doble`;
+  const llave = nueva();
   await Promise.all(
     Array.from({ length: 5 }, async () => {
       const desde = new Date(Date.now() - 20 * 60_000).toISOString();
@@ -74,8 +75,8 @@ try {
   const { count } = await db.from("reportes_viaje").select("id", { count: "exact", head: true }).eq("usuario_id", llave);
   ok(count === 1, `toques repetidos al mismo tiempo cuentan una sola vez (${count} guardados)`);
 } finally {
-  await db.from("reportes_viaje").delete().like("usuario_id", `${PREFIJO}%`);
-  const { count } = await db.from("reportes_viaje").select("id", { count: "exact", head: true }).like("usuario_id", `${PREFIJO}%`);
+  await db.from("reportes_viaje").delete().in("usuario_id", [...llaves]);
+  const { count } = await db.from("reportes_viaje").select("id", { count: "exact", head: true }).in("usuario_id", [...llaves]);
   console.log(`limpieza: quedan ${count ?? "?"} avisos de prueba`);
 }
 process.exit(fallas ? 1 : 0);
