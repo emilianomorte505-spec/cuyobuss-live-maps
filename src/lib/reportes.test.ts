@@ -13,7 +13,7 @@ describe("Avisos 'Me subí' de varios pasajeros", () => {
   });
   test("muchos en la misma parada: uno equivocado no distorsiona", () => {
     const m = desvioPorLinea([r("203", 4, 1), r("203", 5, 1), r("203", 4, 2), r("203", 19, 2)], AHORA);
-    strictEqual(m.get("203"), 5 > 4 ? 5 - 0 - 0 === 5 ? 4 : 4 : 4); // mediana de 4,4,5,19 = 4.5 → 5
+    strictEqual(m.get("203"), 5); // mediana de 4,4,5,19 = 4.5 → 5
   });
   test("dos personas en paradas alejadas al mismo tiempo se combinan", () => {
     strictEqual(desvioPorLinea([r("20", 2, 1), r("20", 8, 3)], AHORA).get("20"), 5);
