@@ -62,15 +62,15 @@ try {
   }
 
   // 3) Un pasajero que toca "Me subí" 5 veces a la vez: el tiempo de espera de 20 min
-  //    se controla antes de guardar, así que mostramos cuántos entran.
+  //    se controla dentro de la base de forma atómica.
   const llave = nueva();
   await Promise.all(
-    Array.from({ length: 5 }, async () => {
-      const desde = new Date(Date.now() - 20 * 60_000).toISOString();
-      const { data } = await db.from("reportes_viaje").select("id").eq("usuario_id", llave).gte("created_at", desde).limit(1);
-      if (data && data.length > 0) return;
-      await db.from("reportes_viaje").insert({ ...esperados[0]!, usuario_id: llave });
-    }),
+    Array.from({ length: 5 }, () =>
+      db.rpc("registrar_reporte", {
+        _usuario_id: llave, _linea: "L901", _stop_code: "carga-a", _parada_slug: "",
+        _hora_programada: "12:00", _desvio_minutos: 1, _espera_min: 20,
+      }),
+    ),
   );
   const { count } = await db.from("reportes_viaje").select("id", { count: "exact", head: true }).eq("usuario_id", llave);
   ok(count === 1, `toques repetidos al mismo tiempo cuentan una sola vez (${count} guardados)`);
