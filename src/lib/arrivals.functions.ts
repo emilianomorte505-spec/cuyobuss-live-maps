@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { findStop, arribosBase, type Arrival, type Stop } from "./stops";
 import { horariosDe, proximosMinutos, desvioRespectoPlanilla, type Horarios } from "./timetables";
 import type { Database } from "@/integrations/supabase/types";
+import { desvioPorLinea } from "./reportes";
 
 /** Un reporte de pasajero vale para el resto de la vuelta del colectivo. */
 const VIGENCIA_REPORTE_MIN = 60;
@@ -112,11 +113,7 @@ async function desviosVigentes(): Promise<Map<string, number>> {
     .order("created_at", { ascending: false });
 
   if (error || !data) return mapa;
-  for (const fila of data) {
-    // El primero de cada línea es el más reciente.
-    if (!mapa.has(fila.linea)) mapa.set(fila.linea, fila.desvio_minutos);
-  }
-  return mapa;
+  return desvioPorLinea(data);
 }
 
 /** Suma el atraso o adelanto avisado a bordo a los minutos de la planilla. */
