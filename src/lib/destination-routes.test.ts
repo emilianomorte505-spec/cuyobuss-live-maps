@@ -24,4 +24,11 @@ describe("Destination journeys from this stop", () => {
     route.legs?.[0]?.steps?.push({ transitDetails: { transitLine: { nameShort: "120" }, stopDetails: { arrivalStop: { name: "Hospital" } } } });
     deepStrictEqual(routesFromCurrentStop([route], origin, ["203"])[0]?.lineas, ["203", "120"]);
   });
+  test("prefers walking from the first bus over a transfer when destination is close", () => {
+    const route = journey("203");
+    route.legs![0]!.endLocation = { latLng: { latitude: origin.lat + 0.003, longitude: origin.lng } };
+    route.legs![0]!.steps![0]!.transitDetails!.stopDetails!.arrivalStop!.location = { latLng: { latitude: origin.lat + 0.001, longitude: origin.lng } };
+    route.legs![0]!.steps!.push({ transitDetails: { transitLine: { nameShort: "403" }, stopDetails: { arrivalStop: { name: "Salta" } } } });
+    deepStrictEqual(routesFromCurrentStop([route], origin, ["203"])[0]?.lineas, ["203"]);
+  });
 });

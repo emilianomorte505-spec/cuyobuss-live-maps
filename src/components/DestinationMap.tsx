@@ -68,6 +68,7 @@ export function DestinationMap({ stop }: { stop: Stop }) {
               <strong>{route.lineas.length === 1 ? "Sin cambiar de colectivo" : `${route.lineas.length - 1} ${route.lineas.length === 2 ? "combinación" : "combinaciones"}`}</strong>
               {route.hacia && <span>Tomá el {route.lineas[0]} hacia {route.hacia}</span>}
               {route.bajarEn && <span>Bajá en {route.bajarEn}</span>}
+              {route.caminarMetros && <span>Caminá unos {route.caminarMetros} m hasta tu destino</span>}
               {route.duracionMin !== null && <span>{route.duracionMin} min de viaje estimado</span>}
             </div>
           </article>)}
