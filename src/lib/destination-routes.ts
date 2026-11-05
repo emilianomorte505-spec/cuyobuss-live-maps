@@ -14,7 +14,7 @@ export type DestinationRoute = {
   hacia: string;
   bajarEn: string;
   duracionMin: number | null;
-  caminarMetros?: number;
+  caminarMetros?: number | undefined;
 };
 
 /** Max straight-line walk (≈5 cuadras) from the first bus's stop to the destination to skip a transfer. */
