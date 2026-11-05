@@ -3,7 +3,7 @@ export type TransitRouteStep = {
     headsign?: string;
     stopDetails?: {
       departureStop?: { name?: string; location?: { latLng?: { latitude: number; longitude: number } } };
-      arrivalStop?: { name?: string };
+      arrivalStop?: { name?: string; location?: { latLng?: { latitude: number; longitude: number } } };
     };
     transitLine?: { nameShort?: string; name?: string };
   };
@@ -14,9 +14,20 @@ export type DestinationRoute = {
   hacia: string;
   bajarEn: string;
   duracionMin: number | null;
+  caminarMetros?: number | undefined;
 };
 
-export type GoogleTransitRoute = { duration?: string; legs?: { steps?: TransitRouteStep[] }[] };
+/** Max straight-line walk (≈5 cuadras) from the first bus's stop to the destination to skip a transfer. */
+export const CAMINATA_MAX_M = 500;
+
+type LatLng = { latitude: number; longitude: number };
+function metros(a: LatLng, b: LatLng) {
+  const dy = (a.latitude - b.latitude) * Math.PI / 180;
+  const dx = (a.longitude - b.longitude) * Math.PI / 180 * Math.cos((a.latitude + b.latitude) * Math.PI / 360);
+  return Math.hypot(dx, dy) * 6371000;
+}
+
+export type GoogleTransitRoute = { duration?: string; legs?: { endLocation?: { latLng?: LatLng }; steps?: TransitRouteStep[] }[] };
 
 function normalizarLinea(value: string) {
   return (value.match(/\d{1,4}[A-Za-z]?/)?.[0] ?? value).trim().toUpperCase();
@@ -41,15 +52,27 @@ export function routesFromCurrentStop(
     const dx = (departure.longitude - origin.lng) * Math.PI / 180
       * Math.cos((departure.latitude + origin.lat) * Math.PI / 360);
     if (Math.hypot(dx, dy) * 6371000 > 45) continue;
-    const lineas = transit.map((step) => normalizarLinea(step.transitLine?.nameShort ?? step.transitLine?.name ?? ""));
+    let lineas = transit.map((step) => normalizarLinea(step.transitLine?.nameShort ?? step.transitLine?.name ?? ""));
     if (!lineas[0] || !allowed.has(lineas[0]) || lineas.some((line) => !line)) continue;
-    const last = transit[transit.length - 1];
+    let last = transit[transit.length - 1];
+    let caminarMetros: number | undefined;
+    let directo = false;
+    const end = route.legs?.[route.legs.length - 1]?.endLocation?.latLng;
+    const firstOff = first.stopDetails?.arrivalStop?.location?.latLng;
+    if (lineas.length > 1 && end && firstOff) {
+      const m = metros(firstOff, end);
+      if (m <= CAMINATA_MAX_M) {
+        lineas = [lineas[0]]; last = first; directo = true;
+        caminarMetros = Math.round(m / 50) * 50 || 50;
+      }
+    }
     const bajarEn = last?.stopDetails?.arrivalStop?.name ?? "";
     const identity = `${lineas.join("|")}|${bajarEn}`;
     if (seen.has(identity)) continue;
     seen.add(identity);
     const seconds = /^\d+(\.\d+)?s$/.test(route.duration ?? "") ? Number(route.duration?.slice(0, -1)) : NaN;
-    options.push({ lineas, hacia: first.headsign ?? "", bajarEn, duracionMin: Number.isFinite(seconds) ? Math.ceil(seconds / 60) : null });
+    options.push({ lineas, hacia: first.headsign ?? "", bajarEn, caminarMetros,
+      duracionMin: !directo && Number.isFinite(seconds) ? Math.ceil(seconds / 60) : null });
   }
-  return options.slice(0, 3);
+  return options.sort((a, b) => a.lineas.length - b.lineas.length).slice(0, 3);
 }

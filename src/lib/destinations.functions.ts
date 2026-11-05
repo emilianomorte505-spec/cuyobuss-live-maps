@@ -64,12 +64,13 @@ export const buscarDestino = createServerFn({ method: "POST" })
     }
     if (allowed.length === 0) throw new Error("Todavía no tenemos las líneas de esta parada.");
     const response = await fetch(`${gateway}/routes/directions/v2:computeRoutes`, {
-      method: "POST", headers: { ...headers, "X-Goog-FieldMask": "routes.duration,routes.legs.steps.transitDetails" },
+      method: "POST", headers: { ...headers, "X-Goog-FieldMask": "routes.duration,routes.legs.endLocation,routes.legs.steps.transitDetails" },
       signal: AbortSignal.timeout(15_000),
       body: JSON.stringify({
         origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
         destination: { address: destino },
         travelMode: "TRANSIT", computeAlternativeRoutes: true,
+        transitPreferences: { routingPreference: "FEWER_TRANSFERS" },
         languageCode: "es-AR", departureTime: new Date(Date.now() + 60_000).toISOString(),
       }),
     });
